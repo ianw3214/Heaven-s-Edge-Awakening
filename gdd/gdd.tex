@@ -1,0 +1,49 @@
+\documentclass{article}
+
+\usepackage{hyperref}       % FOR TITLE PAGE %
+\usepackage{bookmark}
+\usepackage{tikz}           % FOR BACKGROUND IMAGES %
+\usepackage[margin=2cm]{geometry}
+
+
+\begin{document}
+
+% TITLE PAGE %
+\begin{titlepage}
+
+    % background image %
+    \tikz[remember picture,overlay] \node[opacity=0.3,inner sep=0pt] at (current page.center){\includegraphics[width=\paperwidth,height=\paperheight]{images/title.png}};
+
+    \begin{center}
+        \vspace*{4cm}
+
+        \Huge{
+            \textbf{HEAVEN'S EDGE}
+        }
+
+        \vspace*{0.5cm}
+        \LARGE{
+            \textbf{AWAKENING}
+        }
+        \vspace*{5.5cm}
+
+        \large{
+            \textbf{Ian Wang}
+        }
+    \end{center}
+\end{titlepage}
+
+% GAME OVERVIEW %
+\section{Overview}
+\hspace*{1cm}
+Heaven's Edge: Awakening is a 2D MMORPG in a classic fantasy setting. Players will have the choice of many races and professions to customize their characters, and band together with other players to fight their way through the evils of the world. The goal of the game would be to eventually defeat \textbf{EVIL BOSS NAME}, and more powerful forces can be added for expansion content.
+
+% DESIGN PHILOSOPHIES %
+\section{Design Philosophies}
+There are 3 core design philosophies that the game revolves around.
+\begin{enumerate}
+    \item The combat should feel smooth and fun; fighting should never feel boring
+    \item The game should encourage a strong sense of community
+    \item \textbf{SOMETHING ELSE I GUESS}
+\end{enumerate}
+\end{document}
