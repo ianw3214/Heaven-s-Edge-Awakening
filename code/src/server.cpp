@@ -16,7 +16,8 @@ int main(int argc, char* argv[]) {
         Address sender;
         unsigned char packet_data[256];
 
-        socket.receive(sender, packet_data, sizeof(packet_data)) <= 0)
+        socket.receive(sender, packet_data, sizeof(packet_data));
+        
         std::cout << "CLIENT ADDRESS: " << sender.getAddress() << '\n';
         std::cout << "CLIENT PORT: " << sender.getPort() << '\n';
 
