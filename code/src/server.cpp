@@ -13,6 +13,17 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    // bind the socket to a port
+    sockaddr_in address;
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons((unsigned short) 9999);
+
+    if (bind(handle, (const sockaddr*) &address, sizeof(sockaddr_in)) < 0) {
+        std::cout << "Failed to bind socket...\n";
+        return 1;
+    }
+
     while (true) {
         unsigned char packet_data[256];
 

@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
     // bind the socket to a port
     sockaddr_in address;
     address.sin_family = AF_INET;
-    address.sin_addr.s_addr = htonl(addr);
+    address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons((unsigned short) 9999);
 
     if (bind(handle, (const sockaddr*) &address, sizeof(sockaddr_in)) < 0) {
@@ -36,7 +36,11 @@ int main(int argc, char* argv[]) {
 
     char packet_data[128] = {'t', 'e', 's', 't', '\0'};
     int packet_size = sizeof(packet_data);
-    int sent_bytes = sendto(handle, (const char*) packet_data, packet_size, 0, (sockaddr*)&address, sizeof(sockaddr_in));
+    sockaddr_in dest;
+    dest.sin_family = AF_INET;
+    dest.sin_addr.s_addr = htonl(addr);
+    dest.sin_port = htons((unsigned short) 9999);
+    int sent_bytes = sendto(handle, (const char*) packet_data, packet_size, 0, (sockaddr*)&dest, sizeof(sockaddr_in));
     if (sent_bytes != packet_size) {
         std::cout << "Failed to send packet...\n";
         return 1;
