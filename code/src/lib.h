@@ -24,3 +24,43 @@ bool socket_init();
 void socket_cleanup();
 
 bool set_socket_nonblocking(int handle);
+
+class Address {
+public:
+    Address();
+    Address(unsigned char a, unsigned char b, unsigned char c, unsigned char d, unsigned short port);
+    Address(unsigned int address, unsigned short port);
+    ~Address();
+
+    unsigned int getAddress() const;
+    unsigned char getA() const;
+    unsigned char getB() const;
+    unsigned char getC() const;
+    unsigned char getD() const;
+    unsigned short getPort() const;
+
+private:
+    unsigned int address;
+    unsigned short port;
+
+};
+
+class Socket {
+public:
+    Socket();
+    ~Socket();
+
+    bool open(unsigned short port);
+    void close();
+
+    bool is_open() const;
+    bool set_nonblocking();
+
+    bool send(const Address & destination, const void * data, int size);
+    int receive(Address & sender, void * data, int size);
+
+private:
+    bool socket_open;
+    int handle;
+    
+};

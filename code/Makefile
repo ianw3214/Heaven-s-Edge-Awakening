@@ -7,6 +7,8 @@ CLIENT_TARGET = build/client
 SERVER_TARGET = build/server
 endif
 
+all: client server
+
 client: src/client.cpp
 	g++ src/client.cpp src/lib.cpp -o $(CLIENT_TARGET) -Wall $(DEPENDENCIES)
 
