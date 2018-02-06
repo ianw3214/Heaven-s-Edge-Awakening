@@ -51,7 +51,7 @@ public:
     ~Socket();
 
     bool open(unsigned short port);
-    void close();
+    void terminate();
 
     bool is_open() const;
     bool set_nonblocking();

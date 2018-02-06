@@ -67,7 +67,7 @@ Socket::Socket() {
 }
 
 Socket::~Socket() {
-    if (is_open()) close();
+    if (is_open()) terminate();
 }
 
 bool Socket::open(unsigned short port) {
@@ -100,7 +100,7 @@ bool Socket::set_nonblocking() {
     return true;
 }
 
-void Socket::close() {
+void Socket::terminate() {
     #if PLATFORM == PLATFORM_WINDOWS
     closesocket(handle);
     #elif PLATFORM == PLATFORM_UNIX || PLATFORM == PLATFORM_MAC
