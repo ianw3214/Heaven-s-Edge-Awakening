@@ -14,9 +14,9 @@ void receive(Socket socket) {
         // receive a response from the server
         char response[256];
         Address temp;
-        socket.receive(temp, response, sizeof(response));
-
-        std::cout << response << '\n';
+        if (socket.receive(temp, response, sizeof(response)) > 0) {
+            std::cout << response << '\n';
+        }
     }
 }
 
@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     socket_init();
 
     Socket socket;
-    if (!socket.open(INADDR_ANY)) {
+    if (!socket.open(9999)) {
         std::cout << "Failed to bind socket port\n";
         return 1;
     }

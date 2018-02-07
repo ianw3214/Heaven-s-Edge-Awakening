@@ -12,7 +12,7 @@
 Address client;
 
 // send the message from the sender to all other clients
-void send_message(Socket socket, char message[], Address sender) {
+void send_message(const Socket& socket, char message[], Address sender) {
     /*
     for (int i = 0; i < MAX_CLIENTS; ++i) {
         if (clients[i].getAddress() == sender.getAddress() && clients[i].getPort() == sender.getPort()) {

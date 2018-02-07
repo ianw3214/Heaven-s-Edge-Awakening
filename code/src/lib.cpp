@@ -113,7 +113,7 @@ bool Socket::is_open() const {
     return socket_open;
 }
 
-bool Socket::send(const Address & destination, const void * data, int size) {
+bool Socket::send(const Address & destination, const void * data, int size) const {
     sockaddr_in dest;
     dest.sin_family = AF_INET;
     dest.sin_addr.s_addr = htonl(destination.getAddress());

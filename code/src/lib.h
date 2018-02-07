@@ -56,7 +56,7 @@ public:
     bool is_open() const;
     bool set_nonblocking();
 
-    bool send(const Address & destination, const void * data, int size);
+    bool send(const Address & destination, const void * data, int size) const;
     int receive(Address & sender, void * data, int size);
 
 private:
