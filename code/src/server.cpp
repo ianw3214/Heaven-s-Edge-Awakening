@@ -50,19 +50,20 @@ void receive() {
         Address sender;
         unsigned char packet_data[256];
 
-        socket.receive(sender, packet_data, sizeof(packet_data));
-        // print out the message from the client
-        std::cout << packet_data << "\n---\n";
+        if (socket.receive(sender, packet_data, sizeof(packet_data)) > 0) {
+            // print out the message from the client
+            std::cout << packet_data << "\n---\n";
 
-        // if the client is not already stored, add the client to the list
-        for (int i = 0; i < MAX_CLIENTS; ++i) {
-            if (clients[i].getAddress() != sender.getAddress() || clients[i].getPort() != sender.getPort()) {
-                add_client(sender);
+            // if the client is not already stored, add the client to the list
+            for (int i = 0; i < MAX_CLIENTS; ++i) {
+                if (clients[i].getAddress() != sender.getAddress() || clients[i].getPort() != sender.getPort()) {
+                    add_client(sender);
+                }
             }
-        }
 
-        // then send the received message to the clients
-        send_message(socket, (char*) packet_data, sender);
+            // then send the received message to the clients
+            send_message(socket, (char*) packet_data, sender);
+        }
     }
 }
 

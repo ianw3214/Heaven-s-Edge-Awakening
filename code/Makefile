@@ -3,6 +3,7 @@ DEPENDENCIES = -lwsock32 -I../libs/mingw_threads
 CLIENT_TARGET = build/client.exe
 SERVER_TARGET = build/server.exe
 else
+DEPENDENCIES = -pthread
 CLIENT_TARGET = build/client
 SERVER_TARGET = build/server
 endif
