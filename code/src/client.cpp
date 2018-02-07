@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     socket_init();
 
     Socket socket;
-    if (!socket.open(9999)) {
+    if (!socket.open(INADDR_ANY)) {
         std::cout << "Failed to bind socket port\n";
         return 1;
     }

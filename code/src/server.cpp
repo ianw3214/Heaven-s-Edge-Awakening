@@ -9,24 +9,11 @@
 #include <thread>
 #endif
 
-#define MAX_CLIENTS 10
-
-// global variables to keep track of clients
-Address clients[MAX_CLIENTS];
-
-// helper function to add clients to the client list
-bool add_client(Address client) {
-    for (int i = 0; i < MAX_CLIENTS; ++i) {
-        if (clients[i].getAddress() == 0) {
-            clients[i] = client;
-            return true;
-        }
-    }
-    return false;
-}
+Address client;
 
 // send the message from the sender to all other clients
 void send_message(Socket socket, char message[], Address sender) {
+    /*
     for (int i = 0; i < MAX_CLIENTS; ++i) {
         if (clients[i].getAddress() == sender.getAddress() && clients[i].getPort() == sender.getPort()) {
             break;
@@ -35,6 +22,8 @@ void send_message(Socket socket, char message[], Address sender) {
             socket.send(sender, message, 256);
         }
     }
+    */
+    socket.send(sender, message, 256);
 }
 
 // thread to receive incoming packets
@@ -55,14 +44,18 @@ void receive() {
             std::cout << packet_data << "\n---\n";
 
             // if the client is not already stored, add the client to the list
+            /*
             for (int i = 0; i < MAX_CLIENTS; ++i) {
                 if (clients[i].getAddress() != sender.getAddress() || clients[i].getPort() != sender.getPort()) {
                     add_client(sender);
+                    break;
                 }
             }
+            */
+            if (client.getAddress() == 0) client = sender;
 
             // then send the received message to the clients
-            send_message(socket, (char*) packet_data, sender);
+            send_message(socket, (char*) packet_data, client);
         }
     }
 }
