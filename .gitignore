@@ -4,3 +4,4 @@ gdd/*.out
 gdd/*.log
 gdd/*.aux
 gdd/images
+libs/
