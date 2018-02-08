@@ -28,7 +28,7 @@ bool add_client(Address client) {
 void send_message(const Socket& socket, char message[], Address sender) {
     for (int i = 0; i < MAX_CLIENTS; ++i) {
         if (clients[i].getAddress() == sender.getAddress() && clients[i].getPort() == sender.getPort()) {
-            break;
+            continue;
         }
         if (clients[i].getAddress() != 0) {
             socket.send(clients[i], message, 256);
