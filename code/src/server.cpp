@@ -54,12 +54,14 @@ void receive() {
             std::cout << packet_data << "\n---\n";
 
             // if the client is not already stored, add the client to the list
+            bool client_found = false;
             for (int i = 0; i < MAX_CLIENTS; ++i) {
-                if (clients[i].getAddress() != sender.getAddress() || clients[i].getPort() != sender.getPort()) {
-                    add_client(sender);
+                if (clients[i].getAddress() == sender.getAddress() && clients[i].getPort() == sender.getPort()) {
+                    client_found = true;
                     break;
                 }
             }
+            if (client_found) add_client(sender);
 
             // then send the received message to the clients
             send_message(socket, (char*) packet_data, sender);
