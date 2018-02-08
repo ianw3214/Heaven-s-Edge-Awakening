@@ -37,6 +37,10 @@ Address::~Address() {
     // do nothing I guess
 }
 
+bool Address::operator==(const Address& other) const {
+    return address == other.address && port == other.port;
+}
+
 unsigned int Address::getAddress() const {
     return address;
 }

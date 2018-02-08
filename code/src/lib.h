@@ -32,6 +32,8 @@ public:
     Address(unsigned int address, unsigned short port);
     ~Address();
 
+    bool operator==(const Address& other) const;
+
     unsigned int getAddress() const;
     unsigned char getA() const;
     unsigned char getB() const;

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <array>
 
 #if PLATFORM == PLATFORM_WINDOWS
 #include "mingw.thread.h"
@@ -11,13 +12,13 @@
 
 #define MAX_CLIENTS 10
 
-Address clients[MAX_CLIENTS];
+std::array<Address, MAX_CLIENTS> clients;
 
 // helper function to add clients to the client list
 bool add_client(Address client) {
-    for (int i = 0; i < MAX_CLIENTS; ++i) {
-        if (clients[i].getAddress() == 0) {
-            clients[i] = client;
+    for (Address& c : clients) {
+        if (c.getAddress() == 0) {
+            c = client;
             return true;
         }
     }
@@ -26,12 +27,12 @@ bool add_client(Address client) {
 
 // send the message from the sender to all other clients
 void send_message(const Socket& socket, char message[], Address sender) {
-    for (int i = 0; i < MAX_CLIENTS; ++i) {
-        if (clients[i].getAddress() == sender.getAddress() && clients[i].getPort() == sender.getPort()) {
+    for (const Address & c : clients) {
+        if (c == sender) {
             continue;
         }
-        if (clients[i].getAddress() != 0) {
-            socket.send(clients[i], message, 256);
+        if (c.getAddress() != 0) {
+            socket.send(c, message, 256);
         }
     }
 }
@@ -55,8 +56,8 @@ void receive() {
 
             // if the client is not already stored, add the client to the list
             bool client_found = false;
-            for (int i = 0; i < MAX_CLIENTS; ++i) {
-                if (clients[i].getAddress() == sender.getAddress() && clients[i].getPort() == sender.getPort()) {
+            for (const Address & c : clients) {
+                if (c == sender) {
                     client_found = true;
                     break;
                 }
