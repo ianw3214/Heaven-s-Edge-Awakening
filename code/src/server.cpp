@@ -61,7 +61,7 @@ void receive() {
                     break;
                 }
             }
-            if (client_found) add_client(sender);
+            if (!client_found) add_client(sender);
 
             // then send the received message to the clients
             send_message(socket, (char*) packet_data, sender);
