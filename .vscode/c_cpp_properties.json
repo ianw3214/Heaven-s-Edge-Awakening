@@ -52,7 +52,9 @@
                 "C:/Program Files (x86)/Windows Kits/10/Include/10.0.15063.0/shared",
                 "C:/Program Files (x86)/Windows Kits/10/Include/10.0.15063.0/winrt",
                 "${workspaceRoot}",
-                "${workspaceRoot}/libs/mingw_threads"
+                "${workspaceRoot}/libs/mingw_threads",
+                "${workspaceRoot}/libs/SDL2-2.0.7/include",
+                "${workspaceRoot}/libs/glew-2.1.0/include"
             ],
             "defines": [
                 "_DEBUG",

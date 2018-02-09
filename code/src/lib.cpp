@@ -48,6 +48,7 @@ unsigned int Address::getAddress() const {
 unsigned char Address::getA() const {
     return ((0b11111111 << 24) & address) >> 24;
 }
+
 unsigned char Address::getB() const {
     return ((0b11111111 << 16) & address) >> 16;
 }
@@ -55,6 +56,7 @@ unsigned char Address::getB() const {
 unsigned char Address::getC() const {
     return ((0b11111111 << 8) & address) >> 8;
 }
+
 unsigned char Address::getD() const {
     return 0b11111111 & address;
 }

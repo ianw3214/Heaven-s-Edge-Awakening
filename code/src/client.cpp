@@ -1,5 +1,11 @@
 #include "lib.h"
 
+#define GLEW_STATIC
+#include <GL/glew.h>
+#include "../../libs/glew-2.1.0/src/glew.c"
+#define SDL_MAIN_HANDLED
+#include "SDL2/SDL.h"
+
 #include <iostream>
 #include <string>
 
@@ -22,7 +28,36 @@ void receive(Socket socket) {
 
 int main(int argc, char* argv[]) {
 
+    GLuint programID;
+    GLint gVertex2DLocation = -1;
+    GLuint VBO = 0;
+    GLuint VAO = 0;
+
+    SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO);
     socket_init();
+
+    // setup openGL
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_Window * window = SDL_CreateWindow("Heaven's Edge: Awakening", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 720, SDL_WINDOW_OPENGL);
+    SDL_GLContext context = SDL_GL_CreateContext(window);
+    if (context == NULL) {
+        std::cout << "Could not create openGL context, ERROR: " << SDL_GetError() << std::endl;
+        return 1;
+    } else {
+        // initialize GLEW
+        glewExperimental = GL_TRUE;
+        GLenum glewError = glewInit();
+        if (glewError != GLEW_OK) {
+            std::cout << "Could not initialize GLEW, ERROR: " << glewGetErrorString(glewError) << std::endl;
+            return 1;
+        }
+        // use vsync I guess cause why not
+        if (SDL_GL_SetSwapInterval(1) < 0) {
+            std::cout << "Unable to set VSync, ERROR: " << SDL_GetError() << std::endl;
+        }
+    }
 
     Socket socket;
     if (!socket.open(INADDR_ANY)) {
@@ -50,6 +85,7 @@ int main(int argc, char* argv[]) {
     }
 
     socket_cleanup();
+    SDL_Quit();
 
     return 0;
 
