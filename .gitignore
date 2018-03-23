@@ -1,7 +1,0 @@
-code/build
-code/*.bat
-gdd/*.out
-gdd/*.log
-gdd/*.aux
-gdd/images
-libs/
