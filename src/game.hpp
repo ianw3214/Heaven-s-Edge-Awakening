@@ -2,7 +2,7 @@
 
 #define TILE_SIZE 64
 
-#define MAP_WIDTH 10
+#define MAP_WIDTH 15
 #define MAP_HEIGHT 10
 
 #define GRAVITY 100
@@ -10,13 +10,22 @@
 
 #define PLAYER_SPEED 500
 
-#include "QcEngine.hpp"
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGHT 720
 
-// struct to represent the data of the player
-struct Player {
-	int x, y;
-	int y_accel;
+#define CAMERA_SPEED 200
+#define CAMERA_MARGIN 200
+
+#include "QcEngine.hpp"
+#include "entities.hpp"
+
+enum Direction {
+	UP = 0,
+	RIGHT = 1,
+	DOWN = 2,
+	LEFT = 3
 };
+
 
 class Game : public State {
 public:
@@ -32,13 +41,27 @@ public:
 
 private:
 	Texture * tile_texture;
-	Texture * player_texture;
+	Texture * arrow_texture;
+	AnimatedTexture * player_texture;
 
-	Player player_data;
+	// entities
+	Player player;
+	std::vector<Arrow> arrows;
+
+	// game state data
+	int cam_x;
+	int cam_y;
 
 	std::vector<int> tilemap;
 	std::vector<bool> collisionmap;
 
-	// helper function to check if player is colliding with a tile
+	// helper functions
+	void handleKeyPresses();
+	void updatePlayer();
+	void updateCamera();
+	void updateArrows();
+	void movePlayer(Direction dir, int distance);
 	bool playerColliding(int x, int y) const;
+	bool arrowColliding(Arrow& a) const;
+
 };
