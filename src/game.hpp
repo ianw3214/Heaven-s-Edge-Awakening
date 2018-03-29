@@ -62,6 +62,6 @@ private:
 	void updateArrows();
 	void movePlayer(Direction dir, int distance);
 	bool playerColliding(int x, int y) const;
-	bool arrowColliding(Arrow& a) const;
+	bool collidingWithTile(Math::Shape& shape) const;
 
 };

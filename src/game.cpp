@@ -73,7 +73,7 @@ void Game::render() {
 	player_texture->render(player.x - cam_x + SCREEN_WIDTH / 2, player.y);
 	for (const Arrow& a : arrows) {
 		arrow_texture->setAngle(a.angle);
-		arrow_texture->render(a.x - cam_x + SCREEN_WIDTH / 2, a.y);
+		arrow_texture->render(a.x - cam_x + SCREEN_WIDTH / 2, a.y - 12);
 	}
 }
 
@@ -151,11 +151,7 @@ void Game::updateCamera() {
 void Game::updateArrows() {
 	for (Arrow& a : arrows) {
 		if (!a.stopped) {
-			// check to see if arrow should be stopped
-			if (arrowColliding(a)) {
-				LOG("LMAO");
-				a.stopped = true;
-			}
+			// calculate a new position based on current arrow state
 			int distance = (int)(a.h_velocity * delta / 1000.f);
 			if (a.right) {
 				a.x += distance;
@@ -171,9 +167,18 @@ void Game::updateArrows() {
 			}
 			// calculate angle
 			double angle = std::atan((double)(a.y_accel) / (double)(a.right ? distance : -distance));
-			a.angle = (int)(angle * 180 / PI);
 			if (!a.right) {
-				a.angle = 180 + a.angle;
+				angle += PI;
+			}
+			a.angle = (int)(angle * 180 / PI);
+			// calculate a collision line based on the angle
+			a.collision.pos = Vec2(a.x, a.y);
+			a.collision.pos2 = Vec2(a.x, a.y);
+			a.collision.pos2.x += (int)(48.0 * std::cos(a.angle));
+			a.collision.pos2.y += (int)(48.0 * std::sin(a.angle));
+			// the arrow should be stopped if it is colliding with something
+			if (collidingWithTile(a.collision)) {
+				a.stopped = true;
 			}
 		}
 	}
@@ -200,25 +205,15 @@ void Game::movePlayer(Direction dir, int distance) {
 // TODO: select tiles to calculate with instead of comparing against every single tile
 bool Game::playerColliding(int x, int y) const {
 	Math::Rectangle player_collision = Math::Rectangle(x, y, TILE_SIZE, TILE_SIZE * 2);
-	for (int i = 0; i < MAP_HEIGHT; i++) {
-		for (int j = 0; j < MAP_WIDTH; j++) {
-			if (collisionmap[i * MAP_WIDTH + j] == 1) {
-				Math::Rectangle target = Math::Rectangle(j * TILE_SIZE, i * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-				if (Math::isColliding(player_collision, target)) {
-					return true;
-				}
-			}
-		}
-	}
-	return false;
+	return collidingWithTile(player_collision);
 }
 
-bool Game::arrowColliding(Arrow & a) const {
+bool Game::collidingWithTile(Math::Shape& shape) const {
 	for (int i = 0; i < MAP_HEIGHT; i++) {
 		for (int j = 0; j < MAP_WIDTH; j++) {
 			if (collisionmap[i * MAP_WIDTH + j] == 1) {
 				Math::Rectangle target = Math::Rectangle(j * TILE_SIZE, i * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-				if (Math::isColliding(a.collision, target)) {
+				if (Math::isColliding(shape, target)) {
 					return true;
 				}
 			}
