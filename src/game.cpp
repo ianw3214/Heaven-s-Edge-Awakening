@@ -18,6 +18,8 @@ void Game::init() {
 	tile_texture = new Texture("assets/tile.png");
 	arrow_texture = new Texture("assets/arrow.png");
 	arrow_texture->setCentre(0, 12);
+	charge_texture = new Texture("assets/charge.png");
+	tick_texture = new Texture("assets/tick.png");
 	player_texture = new AnimatedTexture("assets/player.png");
 	player_texture->generateAtlas(64, 128, 2);
 	player_texture->addAnimationState({ 0, 0 });
@@ -75,6 +77,13 @@ void Game::render() {
 		arrow_texture->setAngle(a.angle);
 		arrow_texture->render(a.x - cam_x + SCREEN_WIDTH / 2, a.y - 12);
 	}
+	if (charging) {
+		charge_texture->render(player.x - cam_x + SCREEN_WIDTH / 2, player.y - 30);
+		float percentage = static_cast<float>(charge_timer.getTicks()) / static_cast<float>(MAX_BOW_CHARGE);
+		percentage = clamp(percentage, 0.f, 1.f);
+		int x_diff = static_cast<int>(64 * percentage) - 6;
+		tick_texture->render(player.x + x_diff - cam_x + SCREEN_WIDTH / 2, player.y - 32);
+	}
 }
 
 void Game::handleKeyPresses() {
@@ -93,36 +102,39 @@ void Game::handleKeyPresses() {
 		player.face_right = false;
 	}
 	if (keyPressed(SDL_SCANCODE_SPACE) && !player.jumping) {
-		player.y_accel = -20;
+		player.y_vel = PLAYER_JUMP_VEL;
 		player.jumping = true;
 	}
 	// TODO: add bow scaling
 	if (keyDown(SDL_SCANCODE_Z)) {
-		LOG("BOW CHARGE")
+		charging = true;
+		charge_timer.reset(true);
 	}
 	if (keyUp(SDL_SCANCODE_Z)) {
-		if (player.face_right) {
-			arrows.push_back({ player.x + TILE_SIZE, player.y, true, 1500, -10, Math::Line(player.x + TILE_SIZE, player.y, player.x + TILE_SIZE, player.y + 48), false});
-		}
-		else {
-			arrows.push_back({ player.x, player.y, false, 1500, -10, Math::Line(player.x , player.y, player.x , player.y + 48), false });
-		}
+		charging = false;
+		// calculate how charged the arrow is
+		float percentage = static_cast<float>(charge_timer.getTicks()) / static_cast<float>(MAX_BOW_CHARGE);
+		percentage = clamp(percentage, 0.f, 1.f);
+		Arrow arrow{player.x + 32, player.y + 16, player.face_right, 0, -800, Math::Line(), player.face_right ? 0 : 180, false};
+		arrow.h_velocity = BASE_ARROW_SPEED + static_cast<int>(percentage * ARROW_SPEED);
+		arrow.collision = Math::Line(player.x, player.y, player.x, player.y);
+		arrows.push_back(arrow);
 	}
 }
 
 void Game::updatePlayer() {
 	// if the player is on the ground, don't worry about calculating new y position
 	if (!player.jumping && playerColliding(player.x, player.y + 1)) {
-		player.y_accel = 0;
+		player.y_vel = 0.f;
 		player.on_ground = true;
 	}
 	else {
 		// TODO: fix gravity to not rely on framerate
 		// calculate change in y position for the player
-		player.y_accel += (int)(delta / 1000.f * GRAVITY);
-		if (player.y_accel != 0) {
-			player.y_accel = player.y_accel > SPEED_CAP ? SPEED_CAP : player.y_accel;
-			movePlayer(DOWN, player.y_accel);
+		player.y_vel += static_cast<int>(delta / 1000.f * GRAVITY);
+		if (player.y_vel != 0.f) {
+			player.y_vel = player.y_vel > SPEED_CAP ? SPEED_CAP : player.y_vel;
+			movePlayer(DOWN, static_cast<int>(player.y_vel * delta / 1000.f));
 		}
 		// if the player is on the ground, set jumping to false again
 		if (playerColliding(player.x, player.y + 1)) {
@@ -151,6 +163,11 @@ void Game::updateCamera() {
 void Game::updateArrows() {
 	for (Arrow& a : arrows) {
 		if (!a.stopped) {
+			// check if the arrow is colliding with anything before moving it
+			if (collidingWithTile(a.collision)) {
+				a.stopped = true;
+				break;
+			}
 			// calculate a new position based on current arrow state
 			int distance = (int)(a.h_velocity * delta / 1000.f);
 			if (a.right) {
@@ -160,26 +177,18 @@ void Game::updateArrows() {
 				a.x -= distance;
 			}
 			// calculate new arrow y position
-			a.y_accel += (int)(delta / 1000.f * GRAVITY);
-			if (a.y_accel != 0) {
-				a.y_accel = a.y_accel > SPEED_CAP ? SPEED_CAP : a.y_accel;
-				a.y += a.y_accel;
-			}
+			a.y_vel += static_cast<float>(delta / 1000.f * GRAVITY);
+			int y_move = static_cast<int>(a.y_vel * delta / 1000.f);
+			a.y_vel = a.y_vel > SPEED_CAP ? SPEED_CAP : a.y_vel;
+			a.y += y_move;
 			// calculate angle
-			double angle = std::atan((double)(a.y_accel) / (double)(a.right ? distance : -distance));
-			if (!a.right) {
-				angle += PI;
-			}
-			a.angle = (int)(angle * 180 / PI);
+			double angle = std::atan2((double)(y_move), (double)(a.right ? distance : -distance));
+			a.angle = static_cast<int>(angle * 180 / PI);
 			// calculate a collision line based on the angle
 			a.collision.pos = Vec2(a.x, a.y);
 			a.collision.pos2 = Vec2(a.x, a.y);
-			a.collision.pos2.x += (int)(48.0 * std::cos(a.angle));
-			a.collision.pos2.y += (int)(48.0 * std::sin(a.angle));
-			// the arrow should be stopped if it is colliding with something
-			if (collidingWithTile(a.collision)) {
-				a.stopped = true;
-			}
+			a.collision.pos2.x += (int)(ARROW_WIDTH * std::cos(angle));
+			a.collision.pos2.y += (int)(ARROW_WIDTH * std::sin(angle));
 		}
 	}
 }

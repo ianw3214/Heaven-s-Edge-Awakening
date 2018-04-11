@@ -5,7 +5,7 @@
 // struct to represent the data of the player
 struct Player {
 	int x, y;
-	int y_accel;
+	float y_vel;
 	bool on_ground, jumping;
 	bool face_right;
 };
@@ -21,7 +21,7 @@ struct Arrow {
 	int x, y;
 	bool right;
 	int h_velocity;
-	int y_accel;
+	float y_vel;
 	Math::Line collision;
 	int angle;
 	bool stopped;
