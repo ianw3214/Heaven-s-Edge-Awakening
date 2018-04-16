@@ -1,5 +1,11 @@
 #pragma once
 
+#include <vector>
+#include <list>
+
+#include "QcEngine.hpp"
+#include "entities.hpp"
+
 #define TILE_SIZE 64
 
 #define MAP_WIDTH 15
@@ -21,9 +27,7 @@
 #define BASE_ARROW_SPEED 500
 #define ARROW_SPEED 1500
 #define ARROW_WIDTH 48.f
-
-#include "QcEngine.hpp"
-#include "entities.hpp"
+#define ARROW_EXPIRE 10000
 
 enum Direction {
 	UP = 0,
@@ -52,20 +56,30 @@ private:
 	Texture * tick_texture;
 	AnimatedTexture * player_texture;
 
-	// entities
+	// -------------------------------------------------------------------------------
+	// ENTITIES
+	// -------------------------------------------------------------------------------
 	Player player;
-	std::vector<Arrow> arrows;
+	// use a list for arrows because arrows in the middle might have to be deleted
+	std::list<Arrow> arrows;
 
-	// game state data
+	// -------------------------------------------------------------------------------
+	// GAME STATE DATA
+	// -------------------------------------------------------------------------------
 	int cam_x;
 	int cam_y;
 	bool charging;
 	Timer charge_timer;
 
+	// -------------------------------------------------------------------------------
+	// MAP DATA
+	// -------------------------------------------------------------------------------
 	std::vector<int> tilemap;
 	std::vector<bool> collisionmap;
 
-	// helper functions
+	// -------------------------------------------------------------------------------
+	// HELPER FUNCTIONS
+	// -------------------------------------------------------------------------------
 	void handleKeyPresses();
 	void updatePlayer();
 	void updateCamera();

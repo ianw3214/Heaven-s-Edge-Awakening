@@ -161,10 +161,13 @@ void Game::updateCamera() {
 }
 
 void Game::updateArrows() {
-	for (Arrow& a : arrows) {
+	auto it = arrows.begin();
+	while(it != arrows.end()) {
+		Arrow& a = *it;
 		if (!a.stopped) {
 			// check if the arrow is colliding with anything before moving it
 			if (collidingWithTile(a.collision)) {
+				a.timer.reset(true);
 				a.stopped = true;
 				break;
 			}
@@ -189,6 +192,14 @@ void Game::updateArrows() {
 			a.collision.pos2 = Vec2(a.x, a.y);
 			a.collision.pos2.x += (int)(ARROW_WIDTH * std::cos(angle));
 			a.collision.pos2.y += (int)(ARROW_WIDTH * std::sin(angle));
+			++it;
+		} else {
+			if (a.timer.getTicks() > ARROW_EXPIRE) {
+				it = arrows.erase(it);
+			}
+			else {
+				++it;
+			}
 		}
 	}
 }

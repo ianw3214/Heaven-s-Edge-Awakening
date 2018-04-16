@@ -25,4 +25,6 @@ struct Arrow {
 	Math::Line collision;
 	int angle;
 	bool stopped;
+	// timer to keep track of when the arrow should dissapear after stopping
+	Timer timer;
 };
