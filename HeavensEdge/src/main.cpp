@@ -4,11 +4,14 @@
 #include <memory>
 #include <ctime>
 
+// -------------------------------------------------------------------------------
+// MAIN PROGRAM FOR GAME
+// -------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
 
 	srand((unsigned int)time(NULL));
 	
-	QcEngine::createWindow("GMD", 1280, 720, false, SDL_WINDOW_BORDERLESS);
+	QcEngine::createWindow("HEAVEN'S EDGE", 1280, 720, false, SDL_WINDOW_BORDERLESS);
 	QcEngine::setRates(60, 44);
 	QcEngine::setState(std::make_unique<Game>());
 

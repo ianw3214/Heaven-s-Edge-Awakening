@@ -28,3 +28,8 @@ struct Arrow {
 	// timer to keep track of when the arrow should dissapear after stopping
 	Timer timer;
 };
+
+// struct to represent a basic enemy
+struct Enemy {
+
+};
