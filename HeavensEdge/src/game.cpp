@@ -14,13 +14,15 @@ Game::~Game() {
 void Game::init() {
 	// initialize player data
 	player = { TILE_SIZE * 2, TILE_SIZE * 2, 0, false, false, true };
+	// initialize other entity data
+	enemies.push_back({ 128, 300 , 0.f, false });
 	// initialize textures
-	tile_texture = new Texture("assets/tile.png");
-	arrow_texture = new Texture("assets/arrow.png");
-	arrow_texture->setCentre(0, 12);
-	charge_texture = new Texture("assets/charge.png");
-	tick_texture = new Texture("assets/tick.png");
-	player_texture = new AnimatedTexture("assets/player.png");
+	loadTexture("tile", "../assets/tile.png");
+	loadTexture("arrow", "../assets/arrow.png")->setCentre(0, 12);
+	loadTexture("charge", "../assets/charge.png");
+	loadTexture("tick", "../assets/tick.png");
+	player_texture = new AnimatedTexture("../assets/player.png");
+	enemy_texture = new Texture("../assets/enemy.png");
 	player_texture->generateAtlas(64, 128, 2);
 	player_texture->addAnimationState({ 0, 0 });
 	player_texture->addAnimationState({ 1, 1 });
@@ -60,6 +62,7 @@ void Game::update() {
 	handleKeyPresses();
 	updatePlayer();
 	updateCamera();
+	updateEnemies();
 	updateArrows();
 }
 
@@ -68,21 +71,24 @@ void Game::render() {
 		for (unsigned int j = 0; j < MAP_WIDTH; ++j) {
 			ASSERT(i * MAP_WIDTH + j < tilemap.size());
 			if (tilemap[i * MAP_WIDTH + j] == 1) {
-				tile_texture->render(j * TILE_SIZE - cam_x + SCREEN_WIDTH / 2, i * TILE_SIZE);
+				getTexture("tile")->render(j * TILE_SIZE - cam_x + SCREEN_WIDTH / 2, i * TILE_SIZE);
 			}
 		}
 	}
 	player_texture->render(player.x - cam_x + SCREEN_WIDTH / 2, player.y);
 	for (const Arrow& a : arrows) {
-		arrow_texture->setAngle(a.angle);
-		arrow_texture->render(a.x - cam_x + SCREEN_WIDTH / 2, a.y - 12);
+		getTexture("arrow")->setAngle(a.angle);
+		getTexture("arrow")->render(a.x - cam_x + SCREEN_WIDTH / 2, a.y - 12);
+	}
+	for (const Enemy& e : enemies) {
+		enemy_texture->render(e.x - cam_x + SCREEN_WIDTH / 2 , e.y);
 	}
 	if (charging) {
-		charge_texture->render(player.x - cam_x + SCREEN_WIDTH / 2, player.y - 30);
+		getTexture("charge")->render(player.x - cam_x + SCREEN_WIDTH / 2, player.y - 30);
 		float percentage = static_cast<float>(charge_timer.getTicks()) / static_cast<float>(MAX_BOW_CHARGE);
 		percentage = clamp(percentage, 0.f, 1.f);
 		int x_diff = static_cast<int>(64 * percentage) - 6;
-		tick_texture->render(player.x + x_diff - cam_x + SCREEN_WIDTH / 2, player.y - 32);
+		getTexture("tick")->render(player.x + x_diff - cam_x + SCREEN_WIDTH / 2, player.y - 32);
 	}
 }
 
@@ -129,7 +135,6 @@ void Game::updatePlayer() {
 		player.on_ground = true;
 	}
 	else {
-		// TODO: fix gravity to not rely on framerate
 		// calculate change in y position for the player
 		player.y_vel += static_cast<int>(delta / 1000.f * GRAVITY);
 		if (player.y_vel != 0.f) {
@@ -201,6 +206,32 @@ void Game::updateArrows() {
 				++it;
 			}
 		}
+	}
+}
+
+void Game::updateEnemies() {
+	for (Enemy& e : enemies) {
+		// if the player is on the ground, don't worry about calculating new y position
+		if (playerColliding(e.x, e.y + 1)) {
+			e.y_vel = 0.f;
+			e.on_ground = true;
+		} else {
+			// calculate change in y position for the player
+			e.y_vel += static_cast<int>(delta / 1000.f * GRAVITY);
+			if (e.y_vel != 0.f) {
+				e.y_vel = e.y_vel > SPEED_CAP ? SPEED_CAP : e.y_vel;
+				int new_y = static_cast<int>(e.y + e.y_vel * delta / 1000.f);
+				while (playerColliding(e.x, new_y)) {
+					new_y -= 1;
+				}
+				e.y = new_y;
+			}
+			// if the player is on the ground, set jumping to false again
+			if (playerColliding(e.x, e.y + 1)) {
+				e.on_ground = true;
+			}
+		}
+
 	}
 }
 

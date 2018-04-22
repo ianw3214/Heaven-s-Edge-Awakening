@@ -31,5 +31,7 @@ struct Arrow {
 
 // struct to represent a basic enemy
 struct Enemy {
-
+	int x, y;
+	float y_vel;
+	bool on_ground;
 };

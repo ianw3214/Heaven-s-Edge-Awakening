@@ -50,10 +50,7 @@ public:
 	void render();
 
 private:
-	Texture * tile_texture;
-	Texture * arrow_texture;
-	Texture * charge_texture;
-	Texture * tick_texture;
+	Texture * enemy_texture;
 	AnimatedTexture * player_texture;
 
 	// -------------------------------------------------------------------------------
@@ -62,6 +59,7 @@ private:
 	Player player;
 	// use a list for arrows because arrows in the middle might have to be deleted
 	std::list<Arrow> arrows;
+	std::list<Enemy> enemies;
 
 	// -------------------------------------------------------------------------------
 	// GAME STATE DATA
@@ -84,6 +82,7 @@ private:
 	void updatePlayer();
 	void updateCamera();
 	void updateArrows();
+	void updateEnemies();
 	void movePlayer(Direction dir, int distance);
 	bool playerColliding(int x, int y) const;
 	bool collidingWithTile(Math::Shape& shape) const;
