@@ -11,6 +11,7 @@ Editor::~Editor() {
 void Editor::init() {
 	// initialize editor state
 	state = STATE_DEFAULT;
+	current_tile = 0;
 	createFont("default_16", DEFAULT_FONT, 16);
 	// initialize tilemap textures
 	tiles = new TileMap("../assets/tilemap.png");
@@ -21,13 +22,13 @@ void Editor::init() {
 	for (int i = 0; i < DEFAULT_MAP_HEIGHT; ++i) {
 		for (int j = 0; j < DEFAULT_MAP_WIDTH; ++j) {
 			if (i == 0 || i == DEFAULT_MAP_HEIGHT - 1 || j == 0 || j == DEFAULT_MAP_WIDTH - 1) {
-				tilemap.push_back(1);
-			}
-			else {
 				tilemap.push_back(0);
 			}
+			else {
+				tilemap.push_back(-1);
+			}
 		}
-	}
+	} 
 	// initialize file things
 	int cur_y = 10;
 	for (auto& p : fs::directory_iterator(BASE_DIR)) {
@@ -54,9 +55,14 @@ void Editor::resume() {
 
 void Editor::update() {
 	// update editor state
-	cur_tile_x = getMouseX() / DEFAULT_TILE_SIZE;
-	cur_tile_y = getMouseY() / DEFAULT_TILE_SIZE;
+	cur_tile_x = (getMouseX() + camera_x) / DEFAULT_TILE_SIZE;
+	cur_tile_y = (getMouseY() + camera_y) / DEFAULT_TILE_SIZE;
 	handleKeyPresses();
+	// the default click is to change the current tile
+	if (getMouseDown() && state == STATE_DEFAULT) {
+		int current = TILEMAP(cur_tile_x, cur_tile_y);
+		tilemap[current] = current_tile;
+	}
 	// the user is currently dragging the mouse around to pan the screen
 	if (getMousePressed() && state == STATE_PANNING) {
 		pan_mouse_x = getMouseX();
@@ -90,8 +96,8 @@ void Editor::update() {
 void Editor::render() {
 	for (int i = 0; i < DEFAULT_MAP_HEIGHT; ++i) {
 		for (int j = 0; j < DEFAULT_MAP_WIDTH; ++j) {
-			if (tilemap[i * DEFAULT_MAP_WIDTH + j] == 1) {
-				tiles->render(j * DEFAULT_TILE_SIZE - camera_x, i * DEFAULT_TILE_SIZE - camera_y, 0);
+			if (tilemap[TILEMAP(j, i)] >= 0) {
+				tiles->render(j * DEFAULT_TILE_SIZE - camera_x, i * DEFAULT_TILE_SIZE - camera_y, tilemap[TILEMAP(j, i)]);
 			}
 		}
 	}
@@ -136,5 +142,11 @@ void Editor::handleKeyPresses() {
 	}
 	if (keyDown(SDL_SCANCODE_F)) {
 		state = STATE_CHOOSE_FILE;
+	}
+	if (keyDown(SDL_SCANCODE_D)) {
+		current_tile += current_tile >= tiles->getNumTiles() - 1 ? 0 : 1;
+	}
+	if (keyDown(SDL_SCANCODE_A)) {
+		current_tile -= current_tile <= 0 ? 0 : 1;
 	}
 }

@@ -15,6 +15,8 @@ namespace fs = std::experimental::filesystem::v1;
 #define BASE_DIR			"../assets"
 #define DEFAULT_FONT		"../assets/fonts/Munro.ttf"
 
+#define TILEMAP(x, y)		(y * DEFAULT_MAP_WIDTH + x)
+
 enum EditorState {
 	STATE_DEFAULT,
 	STATE_PANNING,
@@ -56,6 +58,7 @@ private:
 	// EDITOR FLAGS
 	// -------------------------------------------------------------------------------
 	EditorState state;
+	int current_tile;
 
 	// -------------------------------------------------------------------------------
 	// HELPER FUNCTIONS
