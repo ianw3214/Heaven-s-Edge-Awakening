@@ -13,9 +13,9 @@ Game::~Game() {
 
 void Game::init() {
 	// initialize player data
-	player = { TILE_SIZE * 2, TILE_SIZE * 2, 0, false, false, true };
+	player = { TILE_SIZE * 2, TILE_SIZE * 2, 0, false, false, true, 5 };
 	// initialize other entity data
-	enemies.push_back({ 128, 300 , 0.f, false });
+	enemies.push_back({ 248, 300 , 0.f, false, 5 });
 	// initialize textures
 	loadTexture("tile", "../assets/tile.png");
 	loadTexture("arrow", "../assets/arrow.png")->setCentre(0, 12);
@@ -98,12 +98,14 @@ void Game::handleKeyPresses() {
 		exit();
 	}
 	if (keyPressed(SDL_SCANCODE_RIGHT)) {
-		movePlayer(RIGHT, (int)(delta / 1000.f * PLAYER_SPEED));
+		Math::Rectangle r = Math::Rectangle(player.x, player.y, 64, 128);
+		moveEntity(RIGHT, (int)(delta / 1000.f * PLAYER_SPEED), r, E_PLAYER, player.x, player.y);
 		player_texture->changeAnimation(PLAYER_RIGHT);
 		player.face_right = true;
 	}
 	if (keyPressed(SDL_SCANCODE_LEFT)) {
-		movePlayer(LEFT, (int)(delta / 1000.f * PLAYER_SPEED));
+		Math::Rectangle r = Math::Rectangle(player.x, player.y, 64, 128);
+		moveEntity(LEFT, (int)(delta / 1000.f * PLAYER_SPEED), r, E_PLAYER, player.x, player.y);
 		player_texture->changeAnimation(PLAYER_LEFT);
 		player.face_right = false;
 	}
@@ -130,7 +132,8 @@ void Game::handleKeyPresses() {
 
 void Game::updatePlayer() {
 	// if the player is on the ground, don't worry about calculating new y position
-	if (!player.jumping && playerColliding(player.x, player.y + 1)) {
+	// TODO: REMOVE MAGIC NUMBERS HERE
+	if (!player.jumping && entityColliding(player.x, player.y + 1, Math::Rectangle(player.x, player.y, 64, 128), E_PLAYER)) {
 		player.y_vel = 0.f;
 		player.on_ground = true;
 	}
@@ -139,10 +142,10 @@ void Game::updatePlayer() {
 		player.y_vel += static_cast<int>(delta / 1000.f * GRAVITY);
 		if (player.y_vel != 0.f) {
 			player.y_vel = player.y_vel > SPEED_CAP ? SPEED_CAP : player.y_vel;
-			movePlayer(DOWN, static_cast<int>(player.y_vel * delta / 1000.f));
+			moveEntity(DOWN, static_cast<int>(player.y_vel * delta / 1000.f), Math::Rectangle(player.x, player.y, 64, 128), E_PLAYER, player.x, player.y);
 		}
 		// if the player is on the ground, set jumping to false again
-		if (playerColliding(player.x, player.y + 1)) {
+		if (entityColliding(player.x, player.y + 1, Math::Rectangle(player.x, player.y, 64, 128), E_PLAYER)) {
 			player.on_ground = true;
 			player.jumping = false;
 		}
@@ -165,6 +168,13 @@ void Game::updateCamera() {
 	}
 }
 
+// ------------------------------------------------------------------------------
+// Central update function for arrows
+//
+//	- Arrow movement functions are not done with the generalized function because
+//		the collisions aren't exact, and the object that it hit has to be known
+//		in order for the right calculations to be made.
+// ------------------------------------------------------------------------------
 void Game::updateArrows() {
 	auto it = arrows.begin();
 	while(it != arrows.end()) {
@@ -197,68 +207,95 @@ void Game::updateArrows() {
 			a.collision.pos2 = Vec2(a.x, a.y);
 			a.collision.pos2.x += (int)(ARROW_WIDTH * std::cos(angle));
 			a.collision.pos2.y += (int)(ARROW_WIDTH * std::sin(angle));
-			++it;
 		} else {
 			if (a.timer.getTicks() > ARROW_EXPIRE) {
 				it = arrows.erase(it);
-			}
-			else {
-				++it;
+				continue;
 			}
 		}
+		// check if the arrow hit an enemy
+		bool enemy_hit = false;
+		for (Enemy& e : enemies) {
+			Math::Rectangle e_collision = Math::Rectangle(e.x, e.y, 64, 128);
+			if (Math::isColliding(a.collision, e_collision)) {
+				it = arrows.erase(it);
+				enemy_hit = true;
+				e.health -= 1;
+				if (e.health <= 0) {
+					LOG("ENEMY DEAD!!");
+				}
+				break;
+			}
+		}
+		if (enemy_hit) continue;
+		++it;
 	}
 }
 
 void Game::updateEnemies() {
 	for (Enemy& e : enemies) {
 		// if the player is on the ground, don't worry about calculating new y position
-		if (playerColliding(e.x, e.y + 1)) {
+		// TODO: REMOVE MAGIC NUMBERS HERE
+		if (entityColliding(e.x, e.y + 1, Math::Rectangle(e.x, e.y, 64, 128), E_ENEMY)) {
 			e.y_vel = 0.f;
 			e.on_ground = true;
 		} else {
 			// calculate change in y position for the player
-			e.y_vel += static_cast<int>(delta / 1000.f * GRAVITY);
+			e.y_vel += static_cast<int>(GRAVITY * delta / 1000.f);
 			if (e.y_vel != 0.f) {
 				e.y_vel = e.y_vel > SPEED_CAP ? SPEED_CAP : e.y_vel;
-				int new_y = static_cast<int>(e.y + e.y_vel * delta / 1000.f);
-				while (playerColliding(e.x, new_y)) {
-					new_y -= 1;
-				}
-				e.y = new_y;
-			}
-			// if the player is on the ground, set jumping to false again
-			if (playerColliding(e.x, e.y + 1)) {
-				e.on_ground = true;
+				moveEntity(DOWN, static_cast<int>(e.y_vel * delta / 1000.f), Math::Rectangle(e.x, e.y, 64, 128), E_ENEMY, e.x, e.y);
 			}
 		}
 
 	}
 }
 
+// ------------------------------------------------------------------------------
+// Generalized movement function for any entity in the game
+//
+//	@type represents the type of the entity to be moved, so the correct calculations
+//		can be made for each entity.
+//
+//	@x and @y are references to the x and y variables of the entity so that it can
+//		be directly changed from within the function itself.
+// ------------------------------------------------------------------------------
 // TODO: use some other stepping other than 1 pixel at a time to optimize
-void Game::movePlayer(Direction dir, int distance) {
-	int new_x = player.x;
-	int new_y = player.y;
+void Game::moveEntity(Direction dir, int distance, Math::Shape& collision, EntityType type, int& x, int& y) {
+	int new_x = x;
+	int new_y = y;
 	if (dir == UP) new_y -= distance;
 	if (dir == RIGHT) new_x += distance;
 	if (dir == DOWN) new_y += distance;
 	if (dir == LEFT) new_x -= distance;
 	// tick represents how much to dial back on each iteration
 	int tick = dir == UP || dir == LEFT ? -1 : 1;
-	while (playerColliding(new_x, new_y)) {
+	while (entityColliding(new_x, new_y, collision, type)) {
 		if (dir == UP || dir == DOWN) new_y -= tick;
 		if (dir == RIGHT || dir == LEFT) new_x -= tick;
 	}
-	player.x = new_x;
-	player.y = new_y;
+	x = new_x;
+	y = new_y;
+}
+
+bool Game::entityColliding(int x, int y, Math::Shape& collision, EntityType type) {
+	collision.pos.x = x;
+	collision.pos.y = y;
+	switch (type) {
+	case E_PLAYER: {
+		return collidingWithTile(collision) || collidingWithEnemy(collision);
+	} break;
+	case E_ENEMY: {
+		return collidingWithTile(collision) || collidingWithPlayer(collision);
+	} break;
+	case E_ARROW: {
+		return collidingWithTile(collision) || collidingWithEnemy(collision);
+	} break;
+	}
+	return false;
 }
 
 // TODO: select tiles to calculate with instead of comparing against every single tile
-bool Game::playerColliding(int x, int y) const {
-	Math::Rectangle player_collision = Math::Rectangle(x, y, TILE_SIZE, TILE_SIZE * 2);
-	return collidingWithTile(player_collision);
-}
-
 bool Game::collidingWithTile(Math::Shape& shape) const {
 	for (int i = 0; i < MAP_HEIGHT; i++) {
 		for (int j = 0; j < MAP_WIDTH; j++) {
@@ -271,4 +308,20 @@ bool Game::collidingWithTile(Math::Shape& shape) const {
 		}
 	}
 	return false;
+}
+
+bool Game::collidingWithEnemy(Math::Shape & shape) const {
+	for (const Enemy& e : enemies) {
+		// TODO: REMOVE THESE MAGIC NUMBERS
+		Math::Rectangle target = Math::Rectangle(e.x, e.y, 64, 128);
+		if (Math::isColliding(shape, target)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Game::collidingWithPlayer(Math::Shape & shape) const {
+	Math::Shape target = Math::Rectangle(player.x, player.y, 64, 128);
+	return Math::isColliding(shape, target);
 }

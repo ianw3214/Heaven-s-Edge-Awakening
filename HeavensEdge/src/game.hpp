@@ -83,8 +83,10 @@ private:
 	void updateCamera();
 	void updateArrows();
 	void updateEnemies();
-	void movePlayer(Direction dir, int distance);
-	bool playerColliding(int x, int y) const;
+	void moveEntity(Direction dir, int distance, Math::Shape& collision, EntityType type, int& x, int& y);
+	bool entityColliding(int x, int y, Math::Shape& collision, EntityType type);
 	bool collidingWithTile(Math::Shape& shape) const;
+	bool collidingWithEnemy(Math::Shape& shape) const;
+	bool collidingWithPlayer(Math::Shape& shape) const;
 
 };
