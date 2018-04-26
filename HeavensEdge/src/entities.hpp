@@ -22,6 +22,7 @@ struct Player {
 	bool face_right;
 	// player state variables
 	int health;
+	Math::Rectangle collision;
 };
 
 enum PlayerAnimation {
@@ -55,4 +56,5 @@ struct Enemy {
 	bool on_ground;
 	// enemy state variables
 	int health;
+	Math::Rectangle collision;
 };
