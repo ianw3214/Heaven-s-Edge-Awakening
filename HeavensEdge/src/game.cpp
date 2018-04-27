@@ -27,6 +27,7 @@ void Game::init() {
 	player_texture->generateAtlas(64, 128, 2);
 	player_texture->addAnimationState({ 0, 0 });
 	player_texture->addAnimationState({ 1, 1 });
+	/*
 	// initialize map
 	for (int i = 0; i < MAP_WIDTH * MAP_HEIGHT; ++i) {
 		if (i / MAP_WIDTH == MAP_HEIGHT - 1) {
@@ -41,6 +42,31 @@ void Game::init() {
 			tilemap.emplace_back(0);
 			collisionmap.emplace_back(0);
 		}
+	}
+	*/
+	// TODO: have the map file load more game state data
+	std::fstream map_file;
+	map_file.open(DEFAULT_MAP_FILE, std::fstream::in);
+	if (map_file.is_open()) {
+		int version = 0;
+		map_file >> version;
+		if (version <= 1) {
+			map_file >> map_width;
+			map_file >> map_height;
+			while (!map_file.eof()) {
+				int tile;
+				map_file >> tile;
+				tilemap.push_back(tile);
+				if (tile != 0) collisionmap.push_back(true);
+				else collisionmap.push_back(false);
+				LOG(tile);
+			}
+		} else {
+			// handle "LOAD FAILED: UNHANDLED VERSION" error
+		}
+		map_file.close();
+	} else {
+		// hanlde "LOAD FAILED" error
 	}
 	// initialize game state
 	cam_x = 0;
@@ -68,10 +94,10 @@ void Game::update() {
 }
 
 void Game::render() {
-	for (unsigned int i = 0; i < MAP_HEIGHT; ++i) {
-		for (unsigned int j = 0; j < MAP_WIDTH; ++j) {
-			ASSERT(i * MAP_WIDTH + j < tilemap.size());
-			if (tilemap[i * MAP_WIDTH + j] == 1) {
+	for (unsigned int i = 0; i < map_height; ++i) {
+		for (unsigned int j = 0; j < map_width; ++j) {
+			ASSERT(i * map_width + j < tilemap.size());
+			if (tilemap[i * map_width + j] == 1) {
 				getTexture("tile")->render(j * TILE_SIZE - cam_x + SCREEN_WIDTH / 2, i * TILE_SIZE);
 			}
 		}
@@ -225,7 +251,7 @@ void Game::updateArrows() {
 				enemy_hit = true;
 				e.health -= 1;
 				if (e.health <= 0) {
-					LOG("ENEMY DEAD!!");
+					e.death_timer.reset(true);
 				}
 				break;
 			}
@@ -253,6 +279,17 @@ void Game::updateEnemies() {
 		// update the collision of the enemy to its position
 		e.collision.pos.x = e.x;
 		e.collision.pos.y = e.y;
+	}
+	// TODO: refactor so that everything is done in a single loop
+	// iterate again to see if we should delete the enemy from the game
+	auto it = enemies.begin();
+	while (it != enemies.end()) {
+		Enemy& e = *it;
+		if (e.death_timer.getTicks() > ENEMY_DEATH_TIME) {
+			it = enemies.erase(it);
+		} else {
+			++it;
+		}
 	}
 }
 
@@ -302,9 +339,9 @@ bool Game::entityColliding(int x, int y, Math::Shape& collision, EntityType type
 
 // TODO: select tiles to calculate with instead of comparing against every single tile
 bool Game::collidingWithTile(Math::Shape& shape) const {
-	for (int i = 0; i < MAP_HEIGHT; i++) {
-		for (int j = 0; j < MAP_WIDTH; j++) {
-			if (collisionmap[i * MAP_WIDTH + j] == 1) {
+	for (int i = 0; i < map_height; i++) {
+		for (int j = 0; j < map_width; j++) {
+			if (collisionmap[i * map_width + j] == 1) {
 				Math::Rectangle target = Math::Rectangle(j * TILE_SIZE, i * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 				if (Math::isColliding(shape, target)) {
 					return true;

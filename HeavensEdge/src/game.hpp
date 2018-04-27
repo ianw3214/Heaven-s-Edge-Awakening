@@ -2,14 +2,15 @@
 
 #include <vector>
 #include <list>
+#include <fstream>
 
 #include "QcEngine.hpp"
 #include "entities.hpp"
 
 #define TILE_SIZE 64
 
-#define MAP_WIDTH 15
-#define MAP_HEIGHT 10
+#define DEFAULT_MAP_WIDTH 15
+#define DEFAULT_MAP_HEIGHT 10
 
 #define GRAVITY 3000
 #define SPEED_CAP 2000
@@ -28,6 +29,10 @@
 #define ARROW_SPEED 1500
 #define ARROW_WIDTH 48.f
 #define ARROW_EXPIRE 10000
+
+#define ENEMY_DEATH_TIME 1000
+
+#define DEFAULT_MAP_FILE "../assets/maps/map.txt"
 
 enum Direction {
 	UP = 0,
@@ -72,6 +77,8 @@ private:
 	// -------------------------------------------------------------------------------
 	// MAP DATA
 	// -------------------------------------------------------------------------------
+	int map_width;
+	int map_height;
 	std::vector<int> tilemap;
 	std::vector<bool> collisionmap;
 

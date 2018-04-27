@@ -57,4 +57,5 @@ struct Enemy {
 	// enemy state variables
 	int health;
 	Math::Rectangle collision;
+	Timer death_timer;
 };
