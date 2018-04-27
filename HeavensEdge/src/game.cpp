@@ -94,8 +94,8 @@ void Game::update() {
 }
 
 void Game::render() {
-	for (unsigned int i = 0; i < map_height; ++i) {
-		for (unsigned int j = 0; j < map_width; ++j) {
+	for (int i = 0; i < map_height; ++i) {
+		for (int j = 0; j < map_width; ++j) {
 			ASSERT(i * map_width + j < tilemap.size());
 			if (tilemap[i * map_width + j] == 1) {
 				getTexture("tile")->render(j * TILE_SIZE - cam_x + SCREEN_WIDTH / 2, i * TILE_SIZE);
@@ -163,8 +163,11 @@ void Game::updatePlayer() {
 	if (!player.jumping && entityColliding(player.x, player.y + 1, player.collision, E_PLAYER)) {
 		player.y_vel = 0.f;
 		player.on_ground = true;
-	}
-	else {
+	} else {
+		// if the players head is hitting a tile set the y velocity to 0
+		if (player.jumping && entityColliding(player.x, player.y - 1, player.collision, E_PLAYER)) {
+			player.y_vel = -player.y_vel / 4.f;
+		}
 		// calculate change in y position for the player
 		player.y_vel += static_cast<int>(delta / 1000.f * GRAVITY);
 		if (player.y_vel != 0.f) {
@@ -304,6 +307,7 @@ void Game::updateEnemies() {
 // ------------------------------------------------------------------------------
 // TODO: use some other stepping other than 1 pixel at a time to optimize
 void Game::moveEntity(Direction dir, int distance, Math::Shape& collision, EntityType type, int& x, int& y) {
+	if (distance == 0) return;
 	int new_x = x;
 	int new_y = y;
 	if (dir == UP) new_y -= distance;
@@ -311,7 +315,7 @@ void Game::moveEntity(Direction dir, int distance, Math::Shape& collision, Entit
 	if (dir == DOWN) new_y += distance;
 	if (dir == LEFT) new_x -= distance;
 	// tick represents how much to dial back on each iteration
-	int tick = dir == UP || dir == LEFT ? -1 : 1;
+	int tick = (dir == UP || dir == LEFT ? -1 : 1) * (distance / std::abs(distance));
 	while (entityColliding(new_x, new_y, collision, type)) {
 		if (dir == UP || dir == DOWN) new_y -= tick;
 		if (dir == RIGHT || dir == LEFT) new_x -= tick;
