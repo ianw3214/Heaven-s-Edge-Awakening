@@ -18,6 +18,22 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\entities\arrow.cpp" />
+    <ClCompile Include="src\entities\enemy.cpp" />
+    <ClCompile Include="src\entities\gameObject.cpp" />
+    <ClCompile Include="src\entities\player.cpp" />
+    <ClCompile Include="src\game.cpp" />
+    <ClCompile Include="src\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\entities\arrow.hpp" />
+    <ClInclude Include="src\entities\enemy.hpp" />
+    <ClInclude Include="src\entities\gameObject.hpp" />
+    <ClInclude Include="src\entities\player.hpp" />
+    <ClInclude Include="src\game.hpp" />
+    <ClInclude Include="src\util.hpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{E8607138-9ACE-4CA8-9D99-8A24110FC3AD}</ProjectGuid>
@@ -126,14 +142,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="src\game.cpp" />
-    <ClCompile Include="src\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\game.hpp" />
-    <ClInclude Include="src\entities.hpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -1,49 +1,54 @@
 #pragma once
 
 #include <vector>
-#include <list>
+#include <queue>
 #include <fstream>
 
 #include "QcEngine.hpp"
-#include "entities.hpp"
 
-#define TILE_SIZE 64
+#include "entities\gameObject.hpp"
+#include "entities\player.hpp"
 
-#define DEFAULT_MAP_WIDTH 15
-#define DEFAULT_MAP_HEIGHT 10
-
-#define GRAVITY 4000
-#define SPEED_CAP 2000
-
-#define PLAYER_SPEED 500
-#define PLAYER_JUMP_VEL -1500.f
-
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 720
-
-#define CAMERA_SPEED 200
-#define CAMERA_MARGIN 200
-
-#define MAX_BOW_CHARGE 1000
-#define BASE_ARROW_SPEED 500
-#define ARROW_SPEED 1500
-#define ARROW_WIDTH 48.f
-#define ARROW_EXPIRE 10000
-
-#define ENEMY_DEATH_TIME 1000
+#define KEY_RIGHT	(1 << 0)
+#define KEY_LEFT	(1 << 1)
+#define KEY_SPACE	(1 << 2)
+#define KEY_ATTACK_DOWN	(1 << 3)
+#define KEY_ATTACK_UP   (1 << 4)
 
 #define DEFAULT_MAP_FILE "../assets/maps/map.txt"
 
-enum Direction {
-	UP = 0,
-	RIGHT = 1,
-	DOWN = 2,
-	LEFT = 3
+#define CAMERA_SPEED 700
+
+struct GameData {
+	// -------------------------------------------------------------------------------
+	// GAME ENTITIES
+	// -------------------------------------------------------------------------------
+	std::vector<GameObject*> entities;
+	std::queue<GameObject*> new_entities;
+
+	// -------------------------------------------------------------------------------
+	// MAP DATA
+	// -------------------------------------------------------------------------------
+	int map_width;
+	int map_height;
+	std::vector<int> tilemap;
+	std::vector<bool> collisionmap;
+
+	// -------------------------------------------------------------------------------
+	// GAME STATE VARIABLES
+	// -------------------------------------------------------------------------------
+	int keyStates;
+	int cam_x;
+	int cam_y;
+
+	// UTILITY FUNCTIONS (MAY MOVE LATER)
+	bool collidingWithTiles(const Math::Shape& collision);
 };
 
-
 class Game : public State {
+
 public:
+
 	Game();
 	~Game();
 
@@ -55,45 +60,16 @@ public:
 	void render();
 
 private:
-	Texture * enemy_texture;
-	AnimatedTexture * player_texture;
+
+	GameData * data;
+
+	// keep a player pointer to easily access instead of having to search every time
+	Player * player;
 
 	// -------------------------------------------------------------------------------
-	// ENTITIES
-	// -------------------------------------------------------------------------------
-	Player player;
-	// use a list for arrows because arrows in the middle might have to be deleted
-	std::list<Arrow> arrows;
-	std::list<Enemy> enemies;
-
-	// -------------------------------------------------------------------------------
-	// GAME STATE DATA
-	// -------------------------------------------------------------------------------
-	int cam_x;
-	int cam_y;
-	bool charging;
-	Timer charge_timer;
-
-	// -------------------------------------------------------------------------------
-	// MAP DATA
-	// -------------------------------------------------------------------------------
-	int map_width;
-	int map_height;
-	std::vector<int> tilemap;
-	std::vector<bool> collisionmap;
-
-	// -------------------------------------------------------------------------------
-	// HELPER FUNCTIONS
+	// UTILITY FUNCTIONS
 	// -------------------------------------------------------------------------------
 	void handleKeyPresses();
-	void updatePlayer();
+	void addEntity(GameObject * obj);
 	void updateCamera();
-	void updateArrows();
-	void updateEnemies();
-	void moveEntity(Direction dir, int distance, Math::Shape& collision, EntityType type, int& x, int& y);
-	bool entityColliding(int x, int y, Math::Shape& collision, EntityType type);
-	bool collidingWithTile(Math::Shape& shape) const;
-	bool collidingWithEnemy(Math::Shape& shape) const;
-	bool collidingWithPlayer(Math::Shape& shape) const;
-
 };
