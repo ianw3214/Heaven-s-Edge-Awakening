@@ -18,14 +18,17 @@ void Editor::init() {
 	tiles->generateTiles(DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE);
 	white_bar = new Texture("../assets/white_bar.png");
 	tile_select = new Texture("../assets/tile_select.png");
+	QcEngine::loadTexture("collision", "../assets/collision.png");
 	// initialize a default map
 	for (int i = 0; i < DEFAULT_MAP_HEIGHT; ++i) {
 		for (int j = 0; j < DEFAULT_MAP_WIDTH; ++j) {
 			if (i == 0 || i == DEFAULT_MAP_HEIGHT - 1 || j == 0 || j == DEFAULT_MAP_WIDTH - 1) {
 				tilemap.push_back(0);
+				collisionmap.push_back(true);
 			}
 			else {
 				tilemap.push_back(-1);
+				collisionmap.push_back(false);
 			}
 		}
 	} 
@@ -59,24 +62,33 @@ void Editor::update() {
 	cur_tile_y = (getMouseY() + camera_y) / DEFAULT_TILE_SIZE;
 	handleKeyPresses();
 	// the default click is to change the current tile
-	if (getMouseDown() && state == STATE_DEFAULT) {
+	if (leftMouseHeld() && state == STATE_DEFAULT) {
 		int current = TILEMAP(cur_tile_x, cur_tile_y);
 		tilemap[current] = current_tile;
 	}
 	// the user is currently dragging the mouse around to pan the screen
-	if (getMousePressed() && state == STATE_PANNING) {
+	if (leftMousePressed() && state == STATE_PANNING) {
 		pan_mouse_x = getMouseX();
 		pan_mouse_y = getMouseY();
 		pan_start_x = camera_x;
 		pan_start_y = camera_y;
 	}
 	// the user clicked to start panning the camera around
-	if (getMouseDown() && state == STATE_PANNING) {
+	if (leftMouseHeld() && state == STATE_PANNING) {
 		camera_x = pan_start_x - getMouseX() + pan_mouse_x;
 		camera_y = pan_start_y - getMouseY() + pan_mouse_y;
 	}
+	// the user clicked to edit collisions
+	if (leftMouseHeld() && state == STATE_EDIT_COLLISION) {
+		int current = TILEMAP(cur_tile_x, cur_tile_y);
+		collisionmap[current] = true;
+	}
+	if (rightMouseHeld() && state == STATE_EDIT_COLLISION) {
+		int current = TILEMAP(cur_tile_x, cur_tile_y);
+		collisionmap[current] = false;
+	}
 	// the user just clicked on a file to load
-	if (getMouseDown() && state == STATE_CHOOSE_FILE) {
+	if (leftMousePressed() && state == STATE_CHOOSE_FILE) {
 		for (unsigned int i = 0; i < files.size(); ++i) {
 			if (getMouseX() > files[i].collision.pos.x && getMouseX() < files[i].collision.pos.x + files[i].collision.w &&
 				getMouseY() > files[i].collision.pos.y && getMouseY() < files[i].collision.pos.y + files[i].collision.h) 
@@ -101,6 +113,15 @@ void Editor::render() {
 			}
 		}
 	}
+	if (state == STATE_EDIT_COLLISION) {
+		for (int i = 0; i < DEFAULT_MAP_HEIGHT; ++i) {
+			for (int j = 0; j < DEFAULT_MAP_WIDTH; ++j) {
+				if (collisionmap[TILEMAP(j, i)] == true) {
+					QcEngine::getTexture("collision")->render(j * DEFAULT_TILE_SIZE - camera_x, i * DEFAULT_TILE_SIZE - camera_y);
+				}
+			}
+		}
+	}
 	if (state == STATE_CHOOSE_FILE) {
 		for (unsigned int i = 0; i < files.size(); ++i) {
 			// if the mouse is hovering over current item, render white overlay
@@ -112,7 +133,7 @@ void Editor::render() {
 		}
 	}
 	// render the tile selection image
-	if (state == STATE_DEFAULT) {
+	if (state == STATE_DEFAULT || state == STATE_EDIT_COLLISION) {
 		tile_select->render(cur_tile_x * DEFAULT_TILE_SIZE - camera_x, cur_tile_y * DEFAULT_TILE_SIZE - camera_y);
 	}
 }
@@ -140,8 +161,11 @@ void Editor::handleKeyPresses() {
 	if (keyPressed(SDL_SCANCODE_LEFT)) {
 		camera_x -= static_cast<int>(delta * PAN_SPEED / 1000.f);
 	}
-	if (keyDown(SDL_SCANCODE_F)) {
+	if (keyDown(SDL_SCANCODE_Q)) {
 		state = STATE_CHOOSE_FILE;
+	}
+	if (keyDown(SDL_SCANCODE_W)) {
+		state = STATE_EDIT_COLLISION;
 	}
 	if (keyDown(SDL_SCANCODE_D)) {
 		current_tile += current_tile >= tiles->getNumTiles() - 1 ? 0 : 1;

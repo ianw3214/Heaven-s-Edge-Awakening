@@ -20,7 +20,8 @@ namespace fs = std::experimental::filesystem::v1;
 enum EditorState {
 	STATE_DEFAULT,
 	STATE_PANNING,
-	STATE_CHOOSE_FILE
+	STATE_CHOOSE_FILE,
+	STATE_EDIT_COLLISION
 };
 
 // struct representing each file item in the menu
