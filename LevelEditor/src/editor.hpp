@@ -17,11 +17,15 @@ namespace fs = std::experimental::filesystem::v1;
 
 #define TILEMAP(x, y)		(y * DEFAULT_MAP_WIDTH + x)
 
+enum ProgramState {
+	STATE_EDITOR,
+	STATE_FILE,
+	STATE_SETTINGS
+};
+
 enum EditorState {
-	STATE_DEFAULT,
-	STATE_PANNING,
-	STATE_CHOOSE_FILE,
-	STATE_EDIT_COLLISION
+	EDITOR_EDIT,
+	EDITOR_PANNING
 };
 
 // struct representing each file item in the menu
@@ -58,13 +62,17 @@ private:
 	// -------------------------------------------------------------------------------
 	// EDITOR FLAGS
 	// -------------------------------------------------------------------------------
-	EditorState state;
+	ProgramState state;
+	EditorState editor_state;
 	int current_tile;
 
 	// -------------------------------------------------------------------------------
 	// HELPER FUNCTIONS
 	// -------------------------------------------------------------------------------
 	void handleKeyPresses();
+	void handleLeftMouseClick();
+	void handleLeftMouseHeld();
+	void handleRightMouseHeld();
 
 	std::vector<int> tilemap;
 	std::vector<bool> collisionmap;
