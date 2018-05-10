@@ -12,6 +12,7 @@ void Editor::init() {
 	// initialize editor state
 	state = STATE_EDITOR;
 	editor_state = EDITOR_EDIT;
+	edit_mode = EDIT_TILE;
 	current_tile = 0;
 	// setup a font
 	createFont("default_16", DEFAULT_FONT, 16);
@@ -70,6 +71,7 @@ void Editor::update() {
 }
 
 void Editor::render() {
+	// render the tile map
 	for (int i = 0; i < DEFAULT_MAP_HEIGHT; ++i) {
 		for (int j = 0; j < DEFAULT_MAP_WIDTH; ++j) {
 			if (tilemap[TILEMAP(j, i)] >= 0) {
@@ -77,8 +79,8 @@ void Editor::render() {
 			}
 		}
 	}
-	/*	RETURN COLLISION EDITING CODE SOON
-	if (state == EDITOR) {
+	// render the collision boxes if user is currently editing collisions
+	if (edit_mode == EDIT_COLLISION) {
 		for (int i = 0; i < DEFAULT_MAP_HEIGHT; ++i) {
 			for (int j = 0; j < DEFAULT_MAP_WIDTH; ++j) {
 				if (collisionmap[TILEMAP(j, i)] == true) {
@@ -87,7 +89,6 @@ void Editor::render() {
 			}
 		}
 	}
-	*/
 	if (state == STATE_FILE) {
 		for (unsigned int i = 0; i < files.size(); ++i) {
 			// if the mouse is hovering over current item, render white overlay
@@ -127,12 +128,19 @@ void Editor::handleKeyPresses() {
 	if (keyPressed(SDL_SCANCODE_LEFT)) {
 		camera_x -= static_cast<int>(delta * PAN_SPEED / 1000.f);
 	}
+	// QWERTY for common controls
 	if (keyDown(SDL_SCANCODE_Q)) {
-		state = STATE_FILE;
+		state = STATE_EDITOR;
+		edit_mode = EDIT_TILE;
 	}
 	if (keyDown(SDL_SCANCODE_W)) {
-		editor_state = EDITOR_EDIT;
-	} 
+		state = STATE_EDITOR;
+		edit_mode = EDIT_COLLISION;
+	}
+	// temporary key to put file loading
+	if (keyDown(SDL_SCANCODE_E)) {
+		state = STATE_FILE;
+	}
 	if (keyDown(SDL_SCANCODE_D)) {
 		current_tile += current_tile >= tiles->getNumTiles() - 1 ? 0 : 1;
 	}
@@ -173,7 +181,12 @@ void Editor::handleLeftMouseHeld() {
 		// the default click is to change the current tile
 		if (editor_state == EDITOR_EDIT) {
 			int current = TILEMAP(cur_tile_x, cur_tile_y);
-			tilemap[current] = current_tile;
+			if (edit_mode == EDIT_TILE) {
+				tilemap[current] = current_tile;
+			}
+			if (edit_mode == EDIT_COLLISION) {
+				collisionmap[current] = true;
+			}
 		}
 		// the user clicked to start panning the camera around
 		if (editor_state == EDITOR_PANNING) {
@@ -181,26 +194,18 @@ void Editor::handleLeftMouseHeld() {
 			camera_y = pan_start_y - getMouseY() + pan_mouse_y;
 		}
 	}
-	/*	RETURN COLLISION EDITING CODE
-	// the user clicked to edit collisions
-	if (leftMouseHeld() && state == STATE_EDIT_COLLISION) {
-		int current = TILEMAP(cur_tile_x, cur_tile_y);
-		collisionmap[current] = true;
-	}
-	*/
 }
 
 void Editor::handleRightMouseHeld() {
 	if (state == STATE_EDITOR) {
 		if (editor_state == EDITOR_EDIT) {
 			int current = TILEMAP(cur_tile_x, cur_tile_y);
-			tilemap[current] = -1;
+			if (edit_mode == EDIT_TILE) {
+				tilemap[current] = -1;
+			}
+			if (edit_mode == EDIT_COLLISION) {
+				collisionmap[current] = false;
+			}
 		}
 	}
-	/*	RETURN COLLISION EDITING CODE
-	if (rightMouseHeld() && state == STATE_EDIT_COLLISION) {
-		int current = TILEMAP(cur_tile_x, cur_tile_y);
-		collisionmap[current] = false;
-	}
-	*/
 }

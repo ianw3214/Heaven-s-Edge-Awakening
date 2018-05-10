@@ -28,6 +28,11 @@ enum EditorState {
 	EDITOR_PANNING
 };
 
+enum EditMode {
+	EDIT_TILE,
+	EDIT_COLLISION
+};
+
 // struct representing each file item in the menu
 struct FileMenuItem {
 	std::string name;
@@ -64,6 +69,7 @@ private:
 	// -------------------------------------------------------------------------------
 	ProgramState state;
 	EditorState editor_state;
+	EditMode edit_mode;
 	int current_tile;
 
 	// -------------------------------------------------------------------------------
