@@ -5,7 +5,7 @@ Editor::Editor() {
 }
 
 Editor::~Editor() {
-
+	
 }
 
 void Editor::init() {
@@ -17,12 +17,13 @@ void Editor::init() {
 	// setup a font
 	createFont("default_16", DEFAULT_FONT, 16);
 	// initialize tilemap textures
-	tiles = new TileMap("../assets/tilemap.png");
+	tiles = new TileMap(DEFAULT_TILEMAP);
 	tiles->generateTiles(DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE);
 	white_bar = new Texture("../assets/white_bar.png");
 	tile_select = new Texture("../assets/tile_select.png");
 	QcEngine::loadTexture("collision", "../assets/collision.png");
 	// initialize a default map
+	/*
 	for (int i = 0; i < DEFAULT_MAP_HEIGHT; ++i) {
 		for (int j = 0; j < DEFAULT_MAP_WIDTH; ++j) {
 			if (i == 0 || i == DEFAULT_MAP_HEIGHT - 1 || j == 0 || j == DEFAULT_MAP_WIDTH - 1) {
@@ -35,6 +36,8 @@ void Editor::init() {
 			}
 		}
 	} 
+	*/
+	loadMap();
 	// initialize file things
 	int cur_y = 10;
 	for (auto& p : fs::directory_iterator(BASE_DIR)) {
@@ -115,6 +118,7 @@ void Editor::handleKeyPresses() {
 		}
 	} else {
 		if (state == STATE_EDITOR) editor_state = EDITOR_EDIT;
+		pan_started = false;
 	}
 	if (keyPressed(SDL_SCANCODE_UP)) {
 		camera_y -= static_cast<int>(delta * PAN_SPEED / 1000.f);
@@ -147,12 +151,17 @@ void Editor::handleKeyPresses() {
 	if (keyDown(SDL_SCANCODE_A)) {
 		current_tile -= current_tile <= 0 ? 0 : 1;
 	}
+	if (keyDown(SDL_SCANCODE_S)) {
+		// TODO: move this somewhere else
+		saveMap(DEFAULT_MAP_FILE);
+	}
 }
 
 void Editor::handleLeftMouseClick() {
 	// the user is currently dragging the mouse around to pan the screen
 	if (state == STATE_EDITOR) {
 		if (editor_state == EDITOR_PANNING) {
+			pan_started = true;
 			pan_mouse_x = getMouseX();
 			pan_mouse_y = getMouseY();
 			pan_start_x = camera_x;
@@ -181,6 +190,7 @@ void Editor::handleLeftMouseHeld() {
 		// the default click is to change the current tile
 		if (editor_state == EDITOR_EDIT) {
 			int current = TILEMAP(cur_tile_x, cur_tile_y);
+			if (current < 0 || current > map_width * map_height - 1) return;
 			if (edit_mode == EDIT_TILE) {
 				tilemap[current] = current_tile;
 			}
@@ -190,6 +200,13 @@ void Editor::handleLeftMouseHeld() {
 		}
 		// the user clicked to start panning the camera around
 		if (editor_state == EDITOR_PANNING) {
+			if (!pan_started) {
+				pan_started = true;
+				pan_mouse_x = getMouseX();
+				pan_mouse_y = getMouseY();
+				pan_start_x = camera_x;
+				pan_start_y = camera_y;
+			}
 			camera_x = pan_start_x - getMouseX() + pan_mouse_x;
 			camera_y = pan_start_y - getMouseY() + pan_mouse_y;
 		}
@@ -208,4 +225,88 @@ void Editor::handleRightMouseHeld() {
 			}
 		}
 	}
+}
+
+void Editor::resetMap() {
+	tile_size = DEFAULT_TILE_SIZE;
+	start_x = 0;
+	start_y = 0;
+	num_entities = 0;
+	tilemap_source = DEFAULT_TILEMAP;
+	map_width = DEFAULT_MAP_WIDTH;
+	map_height = DEFAULT_MAP_HEIGHT;
+	for (int i = 0; i < map_width * map_height; ++i) {
+		tilemap.push_back(-1);
+	}
+	for (int i = 0; i < map_width * map_height; ++i) {
+		collisionmap.push_back(false);
+	}
+}
+
+void Editor::loadMap(const std::string & path) {
+	// clear previous tile data before loading in new data
+	tilemap.clear();
+	collisionmap.clear();
+	// open the map file to read
+	std::fstream map_file;
+	map_file.open(path, std::fstream::in);
+	if (map_file.is_open()) {
+		// check a version number
+		int version;
+		map_file >> version;
+		if (version != 1) {
+			resetMap();
+			saveMap(path);
+		}
+		map_file >> tile_size;
+		map_file >> start_x;
+		map_file >> start_y;
+		map_file >> num_entities;
+		// TODO: Add entity data here somehow
+		map_file >> tilemap_source;
+		map_file >> map_width;
+		map_file >> map_height;
+		int tile;
+		for (int i = 0; i < map_width * map_height; ++i) {
+			map_file >> tile;
+			tilemap.push_back(tile);
+		}
+		for (int i = 0; i < map_width * map_height; ++i) {
+			map_file >> tile;
+			collisionmap.push_back(tile);
+		}
+		map_file.close();
+	} else {
+		map_file.close();
+		// hanlde "LOAD FAILED" error
+		resetMap();
+		saveMap(path);
+	}
+}
+
+void Editor::saveMap(const std::string & path) {
+	std::fstream map_file;
+	// create a new file to work with
+	map_file.open(path, std::fstream::out);
+	map_file << 1 << '\n';			// VERSION NUMBER
+	map_file << tile_size << '\n';
+	map_file << start_x << '\n';
+	map_file << start_y << '\n';
+	map_file << num_entities << '\n';
+	map_file << tilemap_source << '\n';
+	map_file << map_width << '\n';
+	map_file << map_height << '\n';
+	for (int i = 0; i < map_height; ++i) {
+		for (int j = 0; j < map_width; ++j) {
+			map_file << tilemap[TILEMAP(j, i)] << ' ';
+		}
+		map_file << '\n';
+	}
+	for (int i = 0; i < map_height; ++i) {
+		for (int j = 0; j < map_width; ++j) {
+			map_file << collisionmap[TILEMAP(j, i)] << ' ';
+		}
+		map_file << '\n';
+	}
+	map_file.close();
 }

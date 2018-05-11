@@ -3,6 +3,7 @@
 #include "QcEngine.hpp"
 
 #include <vector>
+#include <fstream>
 #include <experimental/filesystem>
 
 namespace fs = std::experimental::filesystem::v1;
@@ -16,6 +17,9 @@ namespace fs = std::experimental::filesystem::v1;
 #define DEFAULT_FONT		"../assets/fonts/Munro.ttf"
 
 #define TILEMAP(x, y)		(y * DEFAULT_MAP_WIDTH + x)
+
+#define DEFAULT_TILEMAP		"../assets/tilemap.png"
+#define DEFAULT_MAP_FILE	"../assets/maps/default.txt"
 
 enum ProgramState {
 	STATE_EDITOR,
@@ -71,6 +75,18 @@ private:
 	EditorState editor_state;
 	EditMode edit_mode;
 	int current_tile;
+	bool pan_started;
+
+	// -------------------------------------------------------------------------------
+	// MAP SETTINGS
+	// -------------------------------------------------------------------------------
+	int tile_size;
+	int start_x;
+	int start_y;
+	int num_entities;
+	std::string tilemap_source;
+	int map_width;
+	int map_height;
 
 	// -------------------------------------------------------------------------------
 	// HELPER FUNCTIONS
@@ -79,6 +95,9 @@ private:
 	void handleLeftMouseClick();
 	void handleLeftMouseHeld();
 	void handleRightMouseHeld();
+	void resetMap();
+	void loadMap(const std::string& path = DEFAULT_MAP_FILE);
+	void saveMap(const std::string& path);
 
 	std::vector<int> tilemap;
 	std::vector<bool> collisionmap;
@@ -92,4 +111,5 @@ private:
 	// -------------------------------------------------------------------------------
 	Texture * white_bar;
 	Texture * tile_select;
+
 };

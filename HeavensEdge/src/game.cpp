@@ -29,22 +29,22 @@ void Game::init() {
 	std::fstream map_file;
 	map_file.open(DEFAULT_MAP_FILE, std::fstream::in);
 	if (map_file.is_open()) {
-int version = 0;
-map_file >> version;
-if (version <= 1) {
-	map_file >> data->map_width;
-	map_file >> data->map_height;
-	while (!map_file.eof()) {
-		int tile;
-		map_file >> tile;
-		data->tilemap.push_back(tile);
-		if (tile != 0) data->collisionmap.push_back(true);
-		else data->collisionmap.push_back(false);
-	}
-} else {
-	// handle "LOAD FAILED: UNHANDLED VERSION" error
-}
-map_file.close();
+		int version = 0;
+		map_file >> version;
+		if (version <= 1) {
+			map_file >> data->map_width;
+			map_file >> data->map_height;
+			while (!map_file.eof()) {
+				int tile;
+				map_file >> tile;
+				data->tilemap.push_back(tile);
+				if (tile != 0) data->collisionmap.push_back(true);
+				else data->collisionmap.push_back(false);
+			}
+		} else {
+			// handle "LOAD FAILED: UNHANDLED VERSION" error
+		}
+		map_file.close();
 	} else {
 	// hanlde "LOAD FAILED" error
 	}
