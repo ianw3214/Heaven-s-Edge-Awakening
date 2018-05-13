@@ -19,24 +19,13 @@ void Editor::init() {
 	// initialize tilemap textures
 	tiles = new TileMap(DEFAULT_TILEMAP);
 	tiles->generateTiles(DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE);
-	white_bar = new Texture("../assets/white_bar.png");
-	tile_select = new Texture("../assets/tile_select.png");
-	QcEngine::loadTexture("collision", "../assets/collision.png");
+	QcEngine::loadTexture(TILE_SELECT, TILE_SELECT_IMG);
+	QcEngine::loadTexture(COLLISION, COLLISION_IMG);
+	QcEngine::loadTexture(WHITE_BAR, WHITE_BAR_IMG);
+	QcEngine::loadTexture(BORDER_HOR, BORDER_HOR_IMG);
+	QcEngine::loadTexture(BORDER_VER, BORDER_VER_IMG);
+	QcEngine::loadTexture(BORDER_CORNER, BORDER_CORNER_IMG);
 	// initialize a default map
-	/*
-	for (int i = 0; i < DEFAULT_MAP_HEIGHT; ++i) {
-		for (int j = 0; j < DEFAULT_MAP_WIDTH; ++j) {
-			if (i == 0 || i == DEFAULT_MAP_HEIGHT - 1 || j == 0 || j == DEFAULT_MAP_WIDTH - 1) {
-				tilemap.push_back(0);
-				collisionmap.push_back(true);
-			}
-			else {
-				tilemap.push_back(-1);
-				collisionmap.push_back(false);
-			}
-		}
-	} 
-	*/
 	loadMap();
 	// initialize file things
 	int cur_y = 10;
@@ -75,19 +64,32 @@ void Editor::update() {
 
 void Editor::render() {
 	// render the tile map
-	for (int i = 0; i < DEFAULT_MAP_HEIGHT; ++i) {
-		for (int j = 0; j < DEFAULT_MAP_WIDTH; ++j) {
+	for (int i = 0; i < map_height; ++i) {
+		for (int j = 0; j < map_width; ++j) {
 			if (tilemap[TILEMAP(j, i)] >= 0) {
-				tiles->render(j * DEFAULT_TILE_SIZE - camera_x, i * DEFAULT_TILE_SIZE - camera_y, tilemap[TILEMAP(j, i)]);
+				tiles->render(j * tile_size - camera_x, i * tile_size - camera_y, tilemap[TILEMAP(j, i)]);
 			}
 		}
 	}
+	// render the map borders
+	for (int i = 0; i < map_width; ++i) {
+		QcEngine::getTexture(BORDER_HOR)->render(i * tile_size - camera_x, - 6 - camera_y);
+		QcEngine::getTexture(BORDER_HOR)->render(i * tile_size - camera_x, map_height * tile_size - camera_y);
+	}
+	for (int i = 0; i < map_height; ++i) {
+		QcEngine::getTexture(BORDER_VER)->render(-6 - camera_x, i * tile_size - camera_y);
+		QcEngine::getTexture(BORDER_VER)->render(map_width * tile_size - camera_x, i * tile_size - camera_y);
+	}
+	QcEngine::getTexture(BORDER_CORNER)->render(-6 - camera_x, -6 - camera_y);
+	QcEngine::getTexture(BORDER_CORNER)->render(map_width * tile_size - camera_x, -6 - camera_y);
+	QcEngine::getTexture(BORDER_CORNER)->render(map_width * tile_size - camera_x, map_height * tile_size - camera_y);
+	QcEngine::getTexture(BORDER_CORNER)->render(-6 - camera_x, map_height * tile_size - camera_y);
 	// render the collision boxes if user is currently editing collisions
 	if (edit_mode == EDIT_COLLISION) {
-		for (int i = 0; i < DEFAULT_MAP_HEIGHT; ++i) {
-			for (int j = 0; j < DEFAULT_MAP_WIDTH; ++j) {
+		for (int i = 0; i < map_height ; ++i) {
+			for (int j = 0; j < map_width; ++j) {
 				if (collisionmap[TILEMAP(j, i)] == true) {
-					QcEngine::getTexture("collision")->render(j * DEFAULT_TILE_SIZE - camera_x, i * DEFAULT_TILE_SIZE - camera_y);
+					QcEngine::getTexture(COLLISION)->render(j * tile_size - camera_x, i * tile_size- camera_y);
 				}
 			}
 		}
@@ -97,14 +99,14 @@ void Editor::render() {
 			// if the mouse is hovering over current item, render white overlay
 			if (getMouseX() > files[i].collision.pos.x && getMouseX() < files[i].collision.pos.x + files[i].collision.w &&
 				getMouseY() > files[i].collision.pos.y && getMouseY() < files[i].collision.pos.y + files[i].collision.h) {
-				white_bar->render(10, 10 + 24 * i);
+				QcEngine::getTexture(WHITE_BAR)->render(10, 10 + 24 * i);
 			}
 			files[i].tex->render(10, 10 + 24 * i);
 		}
 	}
 	// render the tile selection image
 	if (state == STATE_EDITOR) {
-		tile_select->render(cur_tile_x * DEFAULT_TILE_SIZE - camera_x, cur_tile_y * DEFAULT_TILE_SIZE - camera_y);
+		QcEngine::getTexture(TILE_SELECT)->render(cur_tile_x * tile_size - camera_x, cur_tile_y * tile_size - camera_y);
 	}
 }
 

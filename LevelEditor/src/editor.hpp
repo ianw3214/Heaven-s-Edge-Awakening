@@ -21,6 +21,19 @@ namespace fs = std::experimental::filesystem::v1;
 #define DEFAULT_TILEMAP		"../assets/tilemap.png"
 #define DEFAULT_MAP_FILE	"../assets/maps/default.txt"
 
+#define TILE_SELECT			"tile_select"
+#define TILE_SELECT_IMG		"../assets/editor/tile_select.png"
+#define COLLISION			"collision"
+#define COLLISION_IMG		"../assets/editor/collision.png"
+#define WHITE_BAR			"white_bar"
+#define WHITE_BAR_IMG		"../assets/editor/white_bar.png"
+#define BORDER_HOR			"border_horizontal"
+#define BORDER_HOR_IMG		"../assets/editor/border_horizontal.png"
+#define BORDER_VER			"border_vertical"
+#define BORDER_VER_IMG		"../assets/editor/border_vertical.png"
+#define BORDER_CORNER		"border_corner"
+#define BORDER_CORNER_IMG	"../assets/editor/border_corner.png"
+
 enum ProgramState {
 	STATE_EDITOR,
 	STATE_FILE,
@@ -105,11 +118,5 @@ private:
 	TileMap * tiles;
 
 	std::vector<FileMenuItem> files;
-
-	// -------------------------------------------------------------------------------
-	// TEXTURES
-	// -------------------------------------------------------------------------------
-	Texture * white_bar;
-	Texture * tile_select;
 
 };

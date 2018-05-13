@@ -15,7 +15,7 @@
 #define KEY_ATTACK_DOWN	(1 << 3)
 #define KEY_ATTACK_UP   (1 << 4)
 
-#define DEFAULT_MAP_FILE "../assets/maps/map.txt"
+#define DEFAULT_MAP_FILE "../assets/maps/default.txt"
 
 #define CAMERA_SPEED 700
 
@@ -29,6 +29,7 @@ struct GameData {
 	// -------------------------------------------------------------------------------
 	// MAP DATA
 	// -------------------------------------------------------------------------------
+	int tile_size;
 	int map_width;
 	int map_height;
 	std::vector<int> tilemap;
@@ -72,4 +73,6 @@ private:
 	void handleKeyPresses();
 	void addEntity(GameObject * obj);
 	void updateCamera();
+	void clearMap();
+	void loadMap(const std::string& path = DEFAULT_MAP_FILE);
 };
