@@ -16,11 +16,10 @@ namespace fs = std::experimental::filesystem::v1;
 #define BASE_DIR			"../assets"
 #define DEFAULT_FONT		"../assets/fonts/Munro.ttf"
 
-#define TILEMAP(x, y)		(y * DEFAULT_MAP_WIDTH + x)
-
 #define DEFAULT_TILEMAP		"../assets/tilemap.png"
 #define DEFAULT_MAP_FILE	"../assets/maps/default.txt"
 
+#define TILEMAP				"tilemap"
 #define TILE_SELECT			"tile_select"
 #define TILE_SELECT_IMG		"../assets/editor/tile_select.png"
 #define COLLISION			"collision"
@@ -112,9 +111,17 @@ private:
 	void loadMap(const std::string& path = DEFAULT_MAP_FILE);
 	void saveMap(const std::string& path);
 
+	// -------------------------------------------------------------------------------
+	// MISC. UTILITY FUNCTIONS
+	// -------------------------------------------------------------------------------
+	inline int tileIndex(int x, int y) const {
+		return y * map_width + x;
+	}
+
 	std::vector<int> tilemap;
 	std::vector<bool> collisionmap;
 
+	// the tilemap is just a pointer, no ownership
 	TileMap * tiles;
 
 	std::vector<FileMenuItem> files;

@@ -17,7 +17,7 @@ void Editor::init() {
 	// setup a font
 	createFont("default_16", DEFAULT_FONT, 16);
 	// initialize tilemap textures
-	tiles = new TileMap(DEFAULT_TILEMAP);
+	tiles = static_cast<TileMap*>(QcEngine::loadTexture(TILEMAP, DEFAULT_TILEMAP, T_TILEMAP));
 	tiles->generateTiles(DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE);
 	QcEngine::loadTexture(TILE_SELECT, TILE_SELECT_IMG);
 	QcEngine::loadTexture(COLLISION, COLLISION_IMG);
@@ -66,8 +66,8 @@ void Editor::render() {
 	// render the tile map
 	for (int i = 0; i < map_height; ++i) {
 		for (int j = 0; j < map_width; ++j) {
-			if (tilemap[TILEMAP(j, i)] >= 0) {
-				tiles->render(j * tile_size - camera_x, i * tile_size - camera_y, tilemap[TILEMAP(j, i)]);
+			if (tilemap[tileIndex(j, i)] >= 0) {
+				tiles->render(j * tile_size - camera_x, i * tile_size - camera_y, tilemap[tileIndex(j, i)]);
 			}
 		}
 	}
@@ -88,7 +88,7 @@ void Editor::render() {
 	if (edit_mode == EDIT_COLLISION) {
 		for (int i = 0; i < map_height ; ++i) {
 			for (int j = 0; j < map_width; ++j) {
-				if (collisionmap[TILEMAP(j, i)] == true) {
+				if (collisionmap[tileIndex(j, i)] == true) {
 					QcEngine::getTexture(COLLISION)->render(j * tile_size - camera_x, i * tile_size- camera_y);
 				}
 			}
@@ -191,7 +191,7 @@ void Editor::handleLeftMouseHeld() {
 	if (state == STATE_EDITOR) {
 		// the default click is to change the current tile
 		if (editor_state == EDITOR_EDIT) {
-			int current = TILEMAP(cur_tile_x, cur_tile_y);
+			int current = tileIndex(cur_tile_x, cur_tile_y);
 			if (current < 0 || current > map_width * map_height - 1) return;
 			if (edit_mode == EDIT_TILE) {
 				tilemap[current] = current_tile;
@@ -218,7 +218,7 @@ void Editor::handleLeftMouseHeld() {
 void Editor::handleRightMouseHeld() {
 	if (state == STATE_EDITOR) {
 		if (editor_state == EDITOR_EDIT) {
-			int current = TILEMAP(cur_tile_x, cur_tile_y);
+			int current = tileIndex(cur_tile_x, cur_tile_y);
 			if (edit_mode == EDIT_TILE) {
 				tilemap[current] = -1;
 			}
@@ -300,13 +300,13 @@ void Editor::saveMap(const std::string & path) {
 	map_file << map_height << '\n';
 	for (int i = 0; i < map_height; ++i) {
 		for (int j = 0; j < map_width; ++j) {
-			map_file << tilemap[TILEMAP(j, i)] << ' ';
+			map_file << tilemap[tileIndex(j, i)] << ' ';
 		}
 		map_file << '\n';
 	}
 	for (int i = 0; i < map_height; ++i) {
 		for (int j = 0; j < map_width; ++j) {
-			map_file << collisionmap[TILEMAP(j, i)] << ' ';
+			map_file << collisionmap[tileIndex(j, i)] << ' ';
 		}
 		map_file << '\n';
 	}

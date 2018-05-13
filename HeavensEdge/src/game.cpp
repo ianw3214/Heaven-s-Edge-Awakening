@@ -14,44 +14,15 @@ void Game::init() {
 	// setup the game data struct
 	data = new GameData{};
 	GameObject::setGameData(data);
-	/*
-	player = new Player(100, 50);
-	addEntity(player);
-	addEntity(new Enemy(200, 50));
-	*/
 	data->cam_x = 0;
 	data->cam_y = 0;
 	// initialize textures
-	QcEngine::loadTexture("tile", "../assets/tile.png");
+	tiles = nullptr;
 	QcEngine::loadTexture("arrow", "../assets/arrow.png");
 	AnimatedTexture * t = static_cast<AnimatedTexture*>(QcEngine::loadTexture("enemy", "../assets/enemy.png", T_ANIMATED));
 	t->generateAtlas(64, 128);
 	t->addAnimationState({ 0, 3 });
-	/*
-	// TODO: have the map file load more game state data
-	std::fstream map_file;
-	map_file.open(DEFAULT_MAP_FILE, std::fstream::in);
-	if (map_file.is_open()) {
-		int version = 0;
-		map_file >> version;
-		if (version <= 1) {
-			map_file >> data->map_width;
-			map_file >> data->map_height;
-			while (!map_file.eof()) {
-				int tile;
-				map_file >> tile;
-				data->tilemap.push_back(tile);
-				if (tile != 0) data->collisionmap.push_back(true);
-				else data->collisionmap.push_back(false);
-			}
-		} else {
-			// handle "LOAD FAILED: UNHANDLED VERSION" error
-		}
-		map_file.close();
-	} else {
-	// hanlde "LOAD FAILED" error
-	}
-	*/
+	// load the map data from a specified path
 	loadMap();
 }
 
@@ -88,8 +59,8 @@ void Game::render() {
 	for (int i = 0; i < data->map_height; ++i) {
 		for (int j = 0; j < data->map_width; ++j) {
 			ASSERT(i * data->map_width + j < data->tilemap.size());
-			if (data->tilemap[i * data->map_width + j] >= 0) {
-				QcEngine::getTexture("tile")->render(j * 64 - data->cam_x, i * 64 - data->cam_y);
+			if (data->tilemap[tileIndex(j, i)] >= 0) {
+				tiles->render(j * data->tile_size - data->cam_x, i * data->tile_size - data->cam_y, data->tilemap[tileIndex(j, i)]);
 			}
 		}
 	}
@@ -130,7 +101,6 @@ void Game::updateCamera() {
 	// TODO: remove magic numbers by using percentages
 	// TODO: adjust for player sprite size
 	// TODO: use acceleration
-	// int screen_x = player->getX() - data->cam_x;
 	if (player->facingRight()) {
 		if (player->getX() - data->cam_x > 500) {
 			data->cam_x += static_cast<int>(CAMERA_SPEED * delta / 1000.f);
@@ -148,7 +118,6 @@ void Game::updateCamera() {
 	}
 	// TODO: refactor code (a lot of duplicate code here)
 	// TODO: take into account player size
-	// int screen_y = player->getY() - data->cam_y;
 	if (player->onGround()) {
 		if (player->getY() - data->cam_y > 520) {
 			data->cam_y += static_cast<int>(CAMERA_SPEED * delta / 1000.f);
@@ -204,6 +173,7 @@ void Game::loadMap(const std::string & path) {
 	// things to be loaded
 	int start_x;
 	int start_y;
+	std::string tilemap_source;
 	// clear previous map data before loading in new data
 	clearMap();
 	// open the map file to read
@@ -223,7 +193,6 @@ void Game::loadMap(const std::string & path) {
 		int num_entities;
 		map_file >> num_entities;
 		// TODO: handle this correctly
-		std::string tilemap_source;
 		map_file >> tilemap_source;
 		map_file >> data->map_width;
 		map_file >> data->map_height;
@@ -243,4 +212,6 @@ void Game::loadMap(const std::string & path) {
 	// assume the file loaded successfully for now
 	player = new Player(start_x, start_y);
 	addEntity(player);
+	tiles = static_cast<TileMap*>(QcEngine::loadTexture(TILEMAP, tilemap_source, T_TILEMAP));
+	tiles->generateTiles(data->tile_size, data->tile_size);
 }

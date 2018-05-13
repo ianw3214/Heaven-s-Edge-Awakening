@@ -19,6 +19,8 @@
 
 #define CAMERA_SPEED 700
 
+#define TILEMAP	"tilemap"
+
 struct GameData {
 	// -------------------------------------------------------------------------------
 	// GAME ENTITIES
@@ -67,6 +69,9 @@ private:
 	// keep a player pointer to easily access instead of having to search every time
 	Player * player;
 
+	// the tilemap is just a pointer, no ownership
+	TileMap * tiles;
+
 	// -------------------------------------------------------------------------------
 	// UTILITY FUNCTIONS
 	// -------------------------------------------------------------------------------
@@ -75,4 +80,8 @@ private:
 	void updateCamera();
 	void clearMap();
 	void loadMap(const std::string& path = DEFAULT_MAP_FILE);
+	
+	inline int tileIndex(int x, int y) const {
+		return y * data->map_width + x;
+	}
 };
