@@ -179,6 +179,52 @@ void Editor::handleKeyPresses() {
 		// TODO: move this somewhere else
 		saveMap(DEFAULT_MAP_FILE);
 	}
+	// using numbers to select a tile
+	if (keyDown(SDL_SCANCODE_1)) {
+		if (tiles->getNumTiles() >= 1) {
+			current_tile = 0;
+		}
+	}
+	if (keyDown(SDL_SCANCODE_2)) {
+		if (tiles->getNumTiles() >= 2) {
+			current_tile = 1;
+		}
+	}
+	if (keyDown(SDL_SCANCODE_3)) {
+		if (tiles->getNumTiles() >= 3) {
+			current_tile = 2;
+		}
+	}
+	if (keyDown(SDL_SCANCODE_4)) {
+		if (tiles->getNumTiles() >= 4) {
+			current_tile = 3;
+		}
+	}
+	if (keyDown(SDL_SCANCODE_5)) {
+		if (tiles->getNumTiles() >= 5) {
+			current_tile = 4;
+		}
+	}
+	if (keyDown(SDL_SCANCODE_6)) {
+		if (tiles->getNumTiles() >= 6) {
+			current_tile = 5;
+		}
+	}
+	if (keyDown(SDL_SCANCODE_7)) {
+		if (tiles->getNumTiles() >= 7) {
+			current_tile = 6;
+		}
+	}
+	if (keyDown(SDL_SCANCODE_8)) {
+		if (tiles->getNumTiles() >= 8) {
+			current_tile = 7;
+		}
+	}
+	if (keyDown(SDL_SCANCODE_9)) {
+		if (tiles->getNumTiles() >= 9) {
+			current_tile = 8;
+		}
+	}
 }
 
 void Editor::handleLeftMouseClick() {
