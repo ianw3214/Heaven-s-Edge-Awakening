@@ -19,6 +19,9 @@ namespace fs = std::experimental::filesystem::v1;
 #define DEFAULT_TILEMAP		"../assets/tilemap.png"
 #define DEFAULT_MAP_FILE	"../assets/maps/default.txt"
 
+#define DEFAULT_PALETTE_X	0
+#define DEFAULT_PALETTE_Y	0
+
 #define TILEMAP				"tilemap"
 #define TILE_SELECT			"tile_select"
 #define TILE_SELECT_IMG		"../assets/editor/tile_select.png"
@@ -26,12 +29,18 @@ namespace fs = std::experimental::filesystem::v1;
 #define COLLISION_IMG		"../assets/editor/collision.png"
 #define WHITE_BAR			"white_bar"
 #define WHITE_BAR_IMG		"../assets/editor/white_bar.png"
+
 #define BORDER_HOR			"border_horizontal"
 #define BORDER_HOR_IMG		"../assets/editor/border_horizontal.png"
 #define BORDER_VER			"border_vertical"
 #define BORDER_VER_IMG		"../assets/editor/border_vertical.png"
 #define BORDER_CORNER		"border_corner"
 #define BORDER_CORNER_IMG	"../assets/editor/border_corner.png"
+
+#define PALETTE_BASE		"palette_base"
+#define PALETTE_BASE_IMG	"../assets/editor/palette_base.png"
+#define PALETTE_SELECT		"palette_select"
+#define PALETTE_SELECT_IMG	"../assets/editor/palette_select.png"
 
 enum ProgramState {
 	STATE_EDITOR,
@@ -79,6 +88,7 @@ private:
 	int pan_start_x, pan_start_y;
 	int pan_mouse_x, pan_mouse_y;
 	int cur_tile_x, cur_tile_y;
+	int palette_x, palette_y;
 
 	// -------------------------------------------------------------------------------
 	// EDITOR FLAGS

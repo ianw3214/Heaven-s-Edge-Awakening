@@ -14,17 +14,25 @@ void Editor::init() {
 	editor_state = EDITOR_EDIT;
 	edit_mode = EDIT_TILE;
 	current_tile = 0;
+	// intiialize editor variables
+	camera_x = 0, camera_y = 0;
+	palette_x = DEFAULT_PALETTE_X, palette_y = DEFAULT_PALETTE_Y;
 	// setup a font
 	createFont("default_16", DEFAULT_FONT, 16);
+	// TODO: load tilemap from specified file
 	// initialize tilemap textures
 	tiles = static_cast<TileMap*>(QcEngine::loadTexture(TILEMAP, DEFAULT_TILEMAP, T_TILEMAP));
 	tiles->generateTiles(DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE);
+	// load commonly used editor textures
 	QcEngine::loadTexture(TILE_SELECT, TILE_SELECT_IMG);
 	QcEngine::loadTexture(COLLISION, COLLISION_IMG);
 	QcEngine::loadTexture(WHITE_BAR, WHITE_BAR_IMG);
 	QcEngine::loadTexture(BORDER_HOR, BORDER_HOR_IMG);
 	QcEngine::loadTexture(BORDER_VER, BORDER_VER_IMG);
 	QcEngine::loadTexture(BORDER_CORNER, BORDER_CORNER_IMG);
+	// load palette textures
+	QcEngine::loadTexture(PALETTE_BASE, PALETTE_BASE_IMG);
+	QcEngine::loadTexture(PALETTE_SELECT, PALETTE_SELECT_IMG);
 	// initialize a default map
 	loadMap();
 	// initialize file things
@@ -54,7 +62,9 @@ void Editor::resume() {
 void Editor::update() {
 	// update editor state
 	cur_tile_x = (getMouseX() + camera_x) / DEFAULT_TILE_SIZE;
+	if (getMouseX() + camera_x < 0) cur_tile_x--;
 	cur_tile_y = (getMouseY() + camera_y) / DEFAULT_TILE_SIZE;
+	if (getMouseY() + camera_y < 0) cur_tile_y--;
 	handleKeyPresses();
 	// handle mouse clicks/holds/releases
 	if (leftMousePressed()) handleLeftMouseClick();
@@ -104,9 +114,21 @@ void Editor::render() {
 			files[i].tex->render(10, 10 + 24 * i);
 		}
 	}
-	// render the tile selection image
 	if (state == STATE_EDITOR) {
+		// render the tile selection image
 		QcEngine::getTexture(TILE_SELECT)->render(cur_tile_x * tile_size - camera_x, cur_tile_y * tile_size - camera_y);
+		if (edit_mode == EDIT_TILE) {
+			// render the tile palette
+			QcEngine::getTexture(PALETTE_BASE)->render(palette_x, palette_y);
+			for (int i = 0; i < tiles->getNumTiles(); ++i) {
+				int x = (i % 3) * tile_size + 6 + palette_x;
+				int y = (i / 3) * tile_size + 6 + palette_y;
+				tiles->render(x, y, i);
+				if (i == current_tile) {
+					QcEngine::getTexture(PALETTE_SELECT)->render(x, y);
+				}
+			}
+		}
 	}
 }
 
@@ -189,17 +211,6 @@ void Editor::handleLeftMouseClick() {
 
 void Editor::handleLeftMouseHeld() {
 	if (state == STATE_EDITOR) {
-		// the default click is to change the current tile
-		if (editor_state == EDITOR_EDIT) {
-			int current = tileIndex(cur_tile_x, cur_tile_y);
-			if (current < 0 || current > map_width * map_height - 1) return;
-			if (edit_mode == EDIT_TILE) {
-				tilemap[current] = current_tile;
-			}
-			if (edit_mode == EDIT_COLLISION) {
-				collisionmap[current] = true;
-			}
-		}
 		// the user clicked to start panning the camera around
 		if (editor_state == EDITOR_PANNING) {
 			if (!pan_started) {
@@ -212,6 +223,32 @@ void Editor::handleLeftMouseHeld() {
 			camera_x = pan_start_x - getMouseX() + pan_mouse_x;
 			camera_y = pan_start_y - getMouseY() + pan_mouse_y;
 		}
+		// the default click is to change the current tile
+		if (editor_state == EDITOR_EDIT) {
+			if (edit_mode == EDIT_TILE) {
+				// the user is clicking to switch palette tiles 
+				// TODO: remove magic numbers here
+				if (Math::isColliding(Vec2(getMouseX(), getMouseY()), Math::Rectangle(palette_x + 6, palette_y + 6, 196, 196))) {
+					int tile_x = (getMouseX() - palette_x - 6) / 64;
+					int tile_y = (getMouseY() - palette_y - 6) / 64;
+					int new_tile = tile_y * 3 + tile_x;
+					if (new_tile < tiles->getNumTiles()) {
+						current_tile = new_tile;
+					}
+				} else {
+					// the user is clicking to edit a tile
+					int current = tileIndex(cur_tile_x, cur_tile_y);
+					if (current < 0 || current > map_width * map_height - 1) return;
+					tilemap[current] = current_tile;
+				}
+			}
+			if (edit_mode == EDIT_COLLISION) {
+				// the user is clicking to edit a collision tile
+				int current = tileIndex(cur_tile_x, cur_tile_y);
+				if (current < 0 || current > map_width * map_height - 1) return;
+				collisionmap[current] = true;
+			}
+		}
 	}
 }
 
@@ -219,6 +256,7 @@ void Editor::handleRightMouseHeld() {
 	if (state == STATE_EDITOR) {
 		if (editor_state == EDITOR_EDIT) {
 			int current = tileIndex(cur_tile_x, cur_tile_y);
+			if (current < 0 || current > map_width * map_height - 1) return;
 			if (edit_mode == EDIT_TILE) {
 				tilemap[current] = -1;
 			}
