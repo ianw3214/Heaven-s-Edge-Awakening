@@ -73,6 +73,8 @@ void Editor::update() {
 }
 
 void Editor::render() {
+	// render the background
+	QcEngine::getTexture("background")->render(-camera_x / 2, -camera_y / 2);
 	// render the tile map
 	for (int i = 0; i < map_height; ++i) {
 		for (int j = 0; j < map_width; ++j) {
@@ -169,15 +171,13 @@ void Editor::handleKeyPresses() {
 	if (keyDown(SDL_SCANCODE_E)) {
 		state = STATE_FILE;
 	}
-	if (keyDown(SDL_SCANCODE_D)) {
-		current_tile += current_tile >= tiles->getNumTiles() - 1 ? 0 : 1;
-	}
-	if (keyDown(SDL_SCANCODE_A)) {
-		current_tile -= current_tile <= 0 ? 0 : 1;
-	}
 	if (keyDown(SDL_SCANCODE_S)) {
 		// TODO: move this somewhere else
 		saveMap(DEFAULT_MAP_FILE);
+	}
+	// RESET THE MAP
+	if (keyDown(SDL_SCANCODE_DELETE)) {
+		resetMap();
 	}
 	// using numbers to select a tile
 	if (keyDown(SDL_SCANCODE_1)) {
@@ -319,6 +319,7 @@ void Editor::resetMap() {
 	start_y = 0;
 	num_entities = 0;
 	tilemap_source = DEFAULT_TILEMAP;
+	background_source = DEFAULT_BACKGROUND;
 	map_width = DEFAULT_MAP_WIDTH;
 	map_height = DEFAULT_MAP_HEIGHT;
 	for (int i = 0; i < map_width * map_height; ++i) {
@@ -350,6 +351,7 @@ void Editor::loadMap(const std::string & path) {
 		map_file >> num_entities;
 		// TODO: Add entity data here somehow
 		map_file >> tilemap_source;
+		map_file >> background_source;
 		map_file >> map_width;
 		map_file >> map_height;
 		int tile;
@@ -368,6 +370,7 @@ void Editor::loadMap(const std::string & path) {
 		resetMap();
 		saveMap(path);
 	}
+	QcEngine::loadTexture("background", background_source);
 }
 
 void Editor::saveMap(const std::string & path) {
@@ -380,6 +383,7 @@ void Editor::saveMap(const std::string & path) {
 	map_file << start_y << '\n';
 	map_file << num_entities << '\n';
 	map_file << tilemap_source << '\n';
+	map_file << background_source << '\n';
 	map_file << map_width << '\n';
 	map_file << map_height << '\n';
 	for (int i = 0; i < map_height; ++i) {

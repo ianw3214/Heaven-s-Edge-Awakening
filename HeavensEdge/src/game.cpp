@@ -56,6 +56,9 @@ void Game::update() {
 }
 
 void Game::render() {
+	// TOOD: figure out better way to store backgrounds
+	// render parallax background
+	QcEngine::getTexture("bg")->render(-data->cam_x / 2, -data->cam_y / 2);
 	for (int i = 0; i < data->map_height; ++i) {
 		for (int j = 0; j < data->map_width; ++j) {
 			ASSERT(i * data->map_width + j < data->tilemap.size());
@@ -174,6 +177,7 @@ void Game::loadMap(const std::string & path) {
 	int start_x;
 	int start_y;
 	std::string tilemap_source;
+	std::string background_source;
 	// clear previous map data before loading in new data
 	clearMap();
 	// open the map file to read
@@ -194,6 +198,7 @@ void Game::loadMap(const std::string & path) {
 		map_file >> num_entities;
 		// TODO: handle this correctly
 		map_file >> tilemap_source;
+		map_file >> background_source;
 		map_file >> data->map_width;
 		map_file >> data->map_height;
 		int tile;
@@ -214,4 +219,6 @@ void Game::loadMap(const std::string & path) {
 	addEntity(player);
 	tiles = static_cast<TileMap*>(QcEngine::loadTexture(TILEMAP, tilemap_source, T_TILEMAP));
 	tiles->generateTiles(data->tile_size, data->tile_size);
+	// TOOD: figure out better way to store backgrounds
+	QcEngine::loadTexture("bg", background_source);
 }

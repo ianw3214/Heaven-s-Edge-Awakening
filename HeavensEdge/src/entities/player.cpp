@@ -97,7 +97,7 @@ void Player::handleKeyStates(Uint32 delta) {
 	if (data->keyStates & KEY_SPACE) {
 		// JUMP
 		// TODO: enapsulate in a function
-		if (!jumping) {
+		if (!jumping && on_ground) {
 			y_vel = -PLAYER_JUMP_VEL;
 			jumping = true;
 		}

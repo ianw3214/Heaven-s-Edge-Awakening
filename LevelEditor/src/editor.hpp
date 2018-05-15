@@ -17,6 +17,8 @@ namespace fs = std::experimental::filesystem::v1;
 #define DEFAULT_FONT		"../assets/fonts/Munro.ttf"
 
 #define DEFAULT_TILEMAP		"../assets/tilemap.png"
+#define DEFAULT_BACKGROUND	"../assets/parallax_test.png"
+
 #define DEFAULT_MAP_FILE	"../assets/maps/default.txt"
 
 #define DEFAULT_PALETTE_X	0
@@ -107,6 +109,7 @@ private:
 	int start_y;
 	int num_entities;
 	std::string tilemap_source;
+	std::string background_source;
 	int map_width;
 	int map_height;
 
