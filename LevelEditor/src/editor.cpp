@@ -322,6 +322,8 @@ void Editor::resetMap() {
 	background_source = DEFAULT_BACKGROUND;
 	map_width = DEFAULT_MAP_WIDTH;
 	map_height = DEFAULT_MAP_HEIGHT;
+	tilemap.clear();
+	collisionmap.clear();
 	for (int i = 0; i < map_width * map_height; ++i) {
 		tilemap.push_back(-1);
 	}

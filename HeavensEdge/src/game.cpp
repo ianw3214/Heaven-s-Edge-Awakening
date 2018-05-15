@@ -142,6 +142,12 @@ void Game::updateCamera() {
 			data->cam_y = player->getY() - 100;
 		}
 	}
+	// finally restrict the camera to be within the play space
+	// TODO: get rid of magic numbers
+	if (data->cam_x < 0) data->cam_x = 0;
+	if (data->cam_x > data->map_width * data->tile_size - 1280) data->cam_x = data->map_width * data->tile_size - 1280;
+	if (data->cam_y < 0) data->cam_y = 0;
+	if (data->cam_y > data->map_height * data->tile_size - 720) data->cam_y = data->map_height * data->tile_size - 720;
 }
 
 void Game::clearMap() {

@@ -9,8 +9,8 @@
 namespace fs = std::experimental::filesystem::v1;
 
 #define DEFAULT_TILE_SIZE	64
-#define DEFAULT_MAP_WIDTH	20
-#define DEFAULT_MAP_HEIGHT	20
+#define DEFAULT_MAP_WIDTH	40
+#define DEFAULT_MAP_HEIGHT	40
 #define PAN_SPEED			300
 
 #define BASE_DIR			"../assets"
