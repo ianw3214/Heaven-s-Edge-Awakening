@@ -11,8 +11,14 @@
 #define PLAYER_JUMP_VEL 1600
 
 // TODO: CHANGE THIS TO AN ENUM
-#define PLAYER_RIGHT (0)
-#define PLAYER_LEFT  (1)
+#define PLAYER_RIGHT_IDLE	(0)
+#define PLAYER_LEFT_IDLE	(1)
+#define PLAYER_RIGHT_RUN	(2)
+#define PLAYER_LEFT_RUN		(3)
+#define PLAYER_RIGHT_JUMP	(4)
+#define PLAYER_LEFT_JUMP	(5)
+#define PLAYER_RIGHT_AIR	(6)
+#define PLAYER_LEFT_AIR		(7)
 
 class Player : public GameObject {
 
@@ -35,6 +41,7 @@ private:
 
 	// just a pointer to the texture, not owned by the class
 	AnimatedTexture * texture;
+	int current_animation;
 
 	int x, y;
 	Math::Rectangle collision;

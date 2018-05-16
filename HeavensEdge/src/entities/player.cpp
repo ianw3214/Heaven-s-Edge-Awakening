@@ -66,14 +66,42 @@ void Player::update(Uint32 delta) {
 	} else {
 		on_ground = false;
 	}
+	// update the player animation state
+	if (!on_ground) {
+		int cur = texture->getCurrentAnimation();
+		if (cur != PLAYER_RIGHT_JUMP && cur != PLAYER_LEFT_JUMP && cur != PLAYER_RIGHT_AIR && cur != PLAYER_LEFT_AIR) {
+			if (face_right) {
+				texture->changeAnimation(PLAYER_RIGHT_AIR);
+			} else {
+				texture->changeAnimation(PLAYER_LEFT_AIR);
+			}
+		}
+	} else if (data->keyStates & KEY_RIGHT) {
+		texture->changeAnimation(PLAYER_RIGHT_RUN);
+	} else if (data->keyStates & KEY_LEFT) {
+		texture->changeAnimation(PLAYER_LEFT_RUN);
+	} else {
+		if (face_right) {
+			texture->changeAnimation(PLAYER_RIGHT_IDLE);
+		} else {
+			texture->changeAnimation(PLAYER_LEFT_IDLE);
+		}
+	}
 }
 
 void Player::init() {
 	// SETUP TEXTURE DATA
 	texture = static_cast<AnimatedTexture*>(QcEngine::loadTexture("player", "../assets/player.png", T_ANIMATED));
-	texture->generateAtlas(64, 128, 2);
-	texture->addAnimationState({ 0, 0 });
-	texture->addAnimationState({ 1, 1 });
+	texture->generateAtlas(64, 128);
+	texture->addAnimationState({ 0, 3 });		// IDLE RIGHT
+	texture->addAnimationState({ 4, 7 });		// IDLE LEFT
+	texture->addAnimationState({ 8, 11 });		// RUN RIGHT
+	texture->addAnimationState({ 12, 15 });		// RUN LEFT
+	texture->addAnimationState({ 16, 19 }, PLAYER_RIGHT_AIR);		// JUMP RIGHT
+	texture->addAnimationState({ 20, 23 }, PLAYER_LEFT_AIR);		// JUMP LEFT
+	texture->addAnimationState({ 24, 27 });		// AIR RIGHT
+	texture->addAnimationState({ 28, 31 });		// AIR LEFT
+	current_animation = PLAYER_LEFT_IDLE;
 	// SETUP COLLISION DATA
 	collision = Math::Rectangle(x, y, PLAYER_WIDTH, PLAYER_HEIGHT);
 	// INITIALIZE ADDITIONAL NEEDED TEXTURES
@@ -85,13 +113,11 @@ void Player::handleKeyStates(Uint32 delta) {
 	if (data->keyStates & KEY_RIGHT) {
 		// MOVE RIGHT
 		move(DIR_RIGHT, (int)(delta / 1000.f * PLAYER_SPEED));
-		texture->changeAnimation(PLAYER_RIGHT);
 		face_right = true;
 	}
 	if (data->keyStates & KEY_LEFT) {
 		// MOVE LEFT
 		move(DIR_LEFT, (int)(delta / 1000.f * PLAYER_SPEED));
-		texture->changeAnimation(PLAYER_LEFT);
 		face_right = false;
 	}
 	if (data->keyStates & KEY_SPACE) {
@@ -100,6 +126,11 @@ void Player::handleKeyStates(Uint32 delta) {
 		if (!jumping && on_ground) {
 			y_vel = -PLAYER_JUMP_VEL;
 			jumping = true;
+			if (face_right) {
+				texture->changeAnimation(PLAYER_RIGHT_JUMP);
+			} else {
+				texture->changeAnimation(PLAYER_LEFT_JUMP);
+			}
 		}
 	}
 	if (data->keyStates & KEY_ATTACK_DOWN) {
