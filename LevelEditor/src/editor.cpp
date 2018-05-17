@@ -139,11 +139,10 @@ void Editor::handleKeyPresses() {
 		exit();
 	}
 	if (keyPressed(SDL_SCANCODE_SPACE)) {
-		if (state == STATE_EDITOR) {
-			editor_state = EDITOR_PANNING;
-		}
+		editor_state = EDITOR_PANNING;
 	} else {
-		if (state == STATE_EDITOR) editor_state = EDITOR_EDIT;
+		if (editor_state == EDITOR_PICK) editor_state = EDITOR_PICK; 
+		else editor_state = EDITOR_EDIT;
 		pan_started = false;
 	}
 	if (keyPressed(SDL_SCANCODE_UP)) {
@@ -178,6 +177,11 @@ void Editor::handleKeyPresses() {
 	// RESET THE MAP
 	if (keyDown(SDL_SCANCODE_DELETE)) {
 		resetMap();
+	}
+	if (keyPressed(SDL_SCANCODE_LALT)) {
+		if (editor_state != EDITOR_PANNING)editor_state = EDITOR_PICK;
+	} else {
+		if (editor_state != EDITOR_PANNING) editor_state = EDITOR_EDIT;
 	}
 	// using numbers to select a tile
 	if (keyDown(SDL_SCANCODE_1)) {
@@ -268,6 +272,15 @@ void Editor::handleLeftMouseHeld() {
 			}
 			camera_x = pan_start_x - getMouseX() + pan_mouse_x;
 			camera_y = pan_start_y - getMouseY() + pan_mouse_y;
+		}
+		if (editor_state == EDITOR_PICK) {
+			int cur = cur_tile_y * map_width + cur_tile_x;
+			if (edit_mode == EDIT_TILE) {
+				current_tile = tilemap[cur];
+			}
+			if (edit_mode == EDIT_COLLISION) {
+				// do nothing I guess :o
+			}
 		}
 		// the default click is to change the current tile
 		if (editor_state == EDITOR_EDIT) {

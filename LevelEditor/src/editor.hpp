@@ -52,7 +52,8 @@ enum ProgramState {
 
 enum EditorState {
 	EDITOR_EDIT,
-	EDITOR_PANNING
+	EDITOR_PANNING,
+	EDITOR_PICK
 };
 
 enum EditMode {

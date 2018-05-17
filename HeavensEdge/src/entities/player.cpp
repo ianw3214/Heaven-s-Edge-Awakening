@@ -72,7 +72,7 @@ void Player::update(Uint32 delta) {
 		if (cur != PLAYER_RIGHT_JUMP && cur != PLAYER_LEFT_JUMP && cur != PLAYER_RIGHT_AIR && cur != PLAYER_LEFT_AIR) {
 			if (face_right) {
 				texture->changeAnimation(PLAYER_RIGHT_AIR);
-			} else {
+			} else { 
 				texture->changeAnimation(PLAYER_LEFT_AIR);
 			}
 		}
