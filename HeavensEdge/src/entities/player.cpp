@@ -161,7 +161,7 @@ void Player::move(Direction dir, int distance) {
 	collision.pos = Vec2(x, y);
 	// tick represents how much to dial back on each iteration
 	int tick = (dir == DIR_UP || dir == DIR_LEFT ? -1 : 1) * (distance / std::abs(distance));
-	while (data->collidingWithTiles(collision)) {
+	while (data->collidingWithTiles(collision, 3)) {
 		if (dir == DIR_UP || dir == DIR_DOWN) y -= tick;
 		if (dir == DIR_RIGHT || dir == DIR_LEFT) x -= tick;
 		collision.pos = Vec2(x, y);

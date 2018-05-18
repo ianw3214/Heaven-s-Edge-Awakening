@@ -163,14 +163,34 @@ void Game::clearMap() {
 	data->collisionmap.clear();
 }
 
-bool GameData::collidingWithTiles(const Math::Shape & collision) {
-	for (int i = 0; i < map_height; i++) {
-		for (int j = 0; j < map_width; j++) {
-			if (collisionmap[i * map_width + j] == 1) {
-				// REPLACE MAGIC NUMBERS
-				Math::Rectangle target = Math::Rectangle(j * 64, i * 64, 64, 64);
-				if (Math::isColliding(collision, target)) {
-					return true;
+bool GameData::collidingWithTiles(const Math::Shape & collision, int range, bool quad) {
+	if (range > 0) {
+		int start_x = collision.pos.x / tile_size;
+		int start_y = collision.pos.y / tile_size;
+		for (int i = quad ? -range : 0; i < range; i++) {
+			for (int j = quad ? -range : 0; j < range; j++) {
+				int t_x = start_x + j;
+				int t_y = start_y + i;
+				// make sure the tile coordinates aren't out of bounds
+				if (t_x < 0 || t_y < 0) continue;
+				if (t_x >= map_width || t_y >= map_height) continue;
+				if (collisionmap[t_y * map_width + t_x] == 1) {
+					Math::Rectangle target = Math::Rectangle(t_x * tile_size, t_y * tile_size, tile_size, tile_size);
+					if (Math::isColliding(collision, target)) {
+						return true;
+					}
+				}
+			}
+		}
+	} else {
+		for (int i = 0; i < map_height; i++) {
+			for (int j = 0; j < map_width; j++) {
+				if (collisionmap[i * map_width + j] == 1) {
+					// REPLACE MAGIC NUMBERS
+					Math::Rectangle target = Math::Rectangle(j * tile_size, i * tile_size, tile_size, tile_size);
+					if (Math::isColliding(collision, target)) {
+						return true;
+					}
 				}
 			}
 		}

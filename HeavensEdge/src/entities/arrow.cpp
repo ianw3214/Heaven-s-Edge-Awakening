@@ -19,7 +19,7 @@ void Arrow::render() {
 void Arrow::update(Uint32 delta) {
 	if (!stopped) {
 		// check if the arrow is colliding with anything before moving it
-		if (data->collidingWithTiles(collision)) {
+		if (data->collidingWithTiles(collision, 2, true)) {
 			timer.reset(true);
 			stopped = true;
 			return;

@@ -45,7 +45,7 @@ struct GameData {
 	int cam_y;
 
 	// UTILITY FUNCTIONS (MAY MOVE LATER)
-	bool collidingWithTiles(const Math::Shape& collision);
+	bool collidingWithTiles(const Math::Shape& collision, int range = 0, bool quad = false);
 };
 
 class Game : public State {
