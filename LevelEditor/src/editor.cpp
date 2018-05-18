@@ -33,6 +33,8 @@ void Editor::init() {
 	// load palette textures
 	QcEngine::loadTexture(PALETTE_BASE, PALETTE_BASE_IMG);
 	QcEngine::loadTexture(PALETTE_SELECT, PALETTE_SELECT_IMG);
+	// load entity textures
+	QcEngine::loadTexture(PLAYER, PLAYER_IMG);
 	// initialize a default map
 	loadMap();
 	// initialize file things
@@ -96,16 +98,6 @@ void Editor::render() {
 	QcEngine::getTexture(BORDER_CORNER)->render(map_width * tile_size - camera_x, -6 - camera_y);
 	QcEngine::getTexture(BORDER_CORNER)->render(map_width * tile_size - camera_x, map_height * tile_size - camera_y);
 	QcEngine::getTexture(BORDER_CORNER)->render(-6 - camera_x, map_height * tile_size - camera_y);
-	// render the collision boxes if user is currently editing collisions
-	if (edit_mode == EDIT_COLLISION) {
-		for (int i = 0; i < map_height ; ++i) {
-			for (int j = 0; j < map_width; ++j) {
-				if (collisionmap[tileIndex(j, i)] == true) {
-					QcEngine::getTexture(COLLISION)->render(j * tile_size - camera_x, i * tile_size- camera_y);
-				}
-			}
-		}
-	}
 	if (state == STATE_FILE) {
 		for (unsigned int i = 0; i < files.size(); ++i) {
 			// if the mouse is hovering over current item, render white overlay
@@ -130,6 +122,20 @@ void Editor::render() {
 					QcEngine::getTexture(PALETTE_SELECT)->render(x, y);
 				}
 			}
+		}
+		// render the collision boxes if user is currently editing collisions
+		if (edit_mode == EDIT_COLLISION) {
+			for (int i = 0; i < map_height; ++i) {
+				for (int j = 0; j < map_width; ++j) {
+					if (collisionmap[tileIndex(j, i)] == true) {
+						QcEngine::getTexture(COLLISION)->render(j * tile_size - camera_x, i * tile_size - camera_y);
+					}
+				}
+			}
+		}
+		if (edit_mode == EDIT_ENTITIES) {
+			// render the player
+			QcEngine::getTexture(PLAYER)->render(start_x * tile_size - camera_x, start_y * tile_size - camera_y);
 		}
 	}
 }
@@ -166,8 +172,12 @@ void Editor::handleKeyPresses() {
 		state = STATE_EDITOR;
 		edit_mode = EDIT_COLLISION;
 	}
-	// temporary key to put file loading
 	if (keyDown(SDL_SCANCODE_E)) {
+		state = STATE_EDITOR;
+		edit_mode = EDIT_ENTITIES;
+	}
+	// temporary key to put file loading
+	if (keyDown(SDL_SCANCODE_R)) {
 		state = STATE_FILE;
 	}
 	if (keyDown(SDL_SCANCODE_S)) {
@@ -306,6 +316,12 @@ void Editor::handleLeftMouseHeld() {
 				int current = tileIndex(cur_tile_x, cur_tile_y);
 				if (current < 0 || current > map_width * map_height - 1) return;
 				collisionmap[current] = true;
+			}
+			if (edit_mode == EDIT_ENTITIES) {
+				// the user is clicking to adjust the position of an entitiy
+				// TODO: add entity types other than just the player
+				start_x = cur_tile_x;
+				start_y = cur_tile_y;
 			}
 		}
 	}

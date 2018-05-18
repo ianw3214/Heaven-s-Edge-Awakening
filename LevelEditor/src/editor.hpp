@@ -44,6 +44,9 @@ namespace fs = std::experimental::filesystem::v1;
 #define PALETTE_SELECT		"palette_select"
 #define PALETTE_SELECT_IMG	"../assets/editor/palette_select.png"
 
+#define PLAYER				"player"
+#define PLAYER_IMG			"../assets/editor/player.png"
+
 enum ProgramState {
 	STATE_EDITOR,
 	STATE_FILE,
@@ -58,7 +61,8 @@ enum EditorState {
 
 enum EditMode {
 	EDIT_TILE,
-	EDIT_COLLISION
+	EDIT_COLLISION,
+	EDIT_ENTITIES
 };
 
 // struct representing each file item in the menu

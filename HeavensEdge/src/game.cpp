@@ -221,7 +221,7 @@ void Game::loadMap(const std::string & path) {
 		// handle "LOAD FAILED" error
 	}
 	// assume the file loaded successfully for now
-	player = new Player(start_x, start_y);
+	player = new Player(start_x * data->tile_size, start_y * data->tile_size);	// starting position in tile coords
 	addEntity(player);
 	tiles = static_cast<TileMap*>(QcEngine::loadTexture(TILEMAP, tilemap_source, T_TILEMAP));
 	tiles->generateTiles(data->tile_size, data->tile_size);
