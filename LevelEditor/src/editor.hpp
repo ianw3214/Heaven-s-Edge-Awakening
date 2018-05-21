@@ -50,6 +50,20 @@ namespace fs = std::experimental::filesystem::v1;
 #define ENEMY				"enemy"
 #define ENEMY_IMG			"../assets/editor/enemy.png"
 
+// HUD SPRITE DEFINITIONS
+#define ICON_TILE			"edit_icon"
+#define ICON_TILE_IMG		"../assets/editor/tile_icon_normal.png"
+#define SELECT_TILE			"tile_select_icon"
+#define SELECT_TILE_IMG		"../assets/editor/tile_icon_select.png"
+#define ICON_COLLISION		"collision_icon"
+#define ICON_COLLISION_IMG	"../assets/editor/collision_icon_normal.png"
+#define SELECT_COLLISION	"collision_select_icon"
+#define SELECT_COLL_IMG		"../assets/editor/collision_icon_select.png"
+#define ICON_ENTITY			"entity_icon"
+#define ICON_ENTITY_IMG		"../assets/editor/entity_icon_normal.png"
+#define SELECT_ENTITY		"entity_select_icon"
+#define SELECT_ENTITY_IMG	"../assets/editor/entity_icon_select.png"
+
 enum ProgramState {
 	STATE_EDITOR,
 	STATE_FILE,

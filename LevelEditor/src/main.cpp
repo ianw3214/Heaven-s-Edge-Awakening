@@ -15,6 +15,9 @@ int main(int argc, char* argv[]) {
 	QcEngine::setRates(60, 44);
 	QcEngine::setState(std::make_unique<Editor>());
 
+	QcEngine::setCVAR("WINDOW WIDTH", DEFAULT_WIDTH);
+	QcEngine::setCVAR("WINDOW HEIGHT", DEFAULT_HEIGHT);
+
 	while (QcEngine::isRunning()) {
 		QcEngine::update();
 	}

@@ -37,6 +37,13 @@ void Editor::init() {
 	// load entity textures
 	QcEngine::loadTexture(PLAYER, PLAYER_IMG);
 	QcEngine::loadTexture(ENEMY, ENEMY_IMG);
+	// load HUG textures
+	QcEngine::loadTexture(ICON_TILE, ICON_TILE_IMG);
+	QcEngine::loadTexture(SELECT_TILE, SELECT_TILE_IMG);
+	QcEngine::loadTexture(ICON_COLLISION, ICON_COLLISION_IMG);
+	QcEngine::loadTexture(SELECT_COLLISION, SELECT_COLL_IMG);
+	QcEngine::loadTexture(ICON_ENTITY, ICON_ENTITY_IMG);
+	QcEngine::loadTexture(SELECT_ENTITY, SELECT_ENTITY_IMG);
 	// initialize a default map
 	loadMap();
 	// initialize file things
@@ -144,6 +151,19 @@ void Editor::render() {
 				}
 			}
 		}
+	}
+	// render HUD
+	QcEngine::getTexture(ICON_TILE)->render(0, QcEngine::getCVARint("WINDOW HEIGHT") - 64);
+	QcEngine::getTexture(ICON_COLLISION)->render(64, QcEngine::getCVARint("WINDOW HEIGHT") - 64);
+	QcEngine::getTexture(ICON_ENTITY)->render(128, QcEngine::getCVARint("WINDOW HEIGHT") - 64);
+	if (edit_mode == EDIT_TILE) {
+		QcEngine::getTexture(SELECT_TILE)->render(0, QcEngine::getCVARint("WINDOW HEIGHT") - 64);
+	}
+	if (edit_mode == EDIT_COLLISION) {
+		QcEngine::getTexture(SELECT_COLLISION)->render(64, QcEngine::getCVARint("WINDOW HEIGHT") - 64);
+	}
+	if (edit_mode == EDIT_ENTITIES) {
+		QcEngine::getTexture(SELECT_ENTITY)->render(128, QcEngine::getCVARint("WINDOW HEIGHT") - 64);
 	}
 }
 
