@@ -222,6 +222,17 @@ void Game::loadMap(const std::string & path) {
 		// TODO: handle this correctly
 		int num_entities;
 		map_file >> num_entities;
+		for (int i = 0; i < num_entities; ++i) {
+			char type;
+			map_file >> type;
+			if (type == 'E') {	// ENEMY
+				int x;
+				int y;
+				map_file >> x;
+				map_file >> y;
+				addEntity(new Enemy(x * data->tile_size, y * data->tile_size));
+			}
+		}
 		// TODO: handle this correctly
 		map_file >> tilemap_source;
 		map_file >> background_source;

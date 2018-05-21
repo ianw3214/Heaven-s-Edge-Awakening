@@ -44,8 +44,11 @@ namespace fs = std::experimental::filesystem::v1;
 #define PALETTE_SELECT		"palette_select"
 #define PALETTE_SELECT_IMG	"../assets/editor/palette_select.png"
 
+// ENTITY SPRITE DEFINITIONS
 #define PLAYER				"player"
 #define PLAYER_IMG			"../assets/editor/player.png"
+#define ENEMY				"enemy"
+#define ENEMY_IMG			"../assets/editor/enemy.png"
 
 enum ProgramState {
 	STATE_EDITOR,
@@ -63,6 +66,21 @@ enum EditMode {
 	EDIT_TILE,
 	EDIT_COLLISION,
 	EDIT_ENTITIES
+};
+
+enum EntityEditMode {
+	E_EDIT_PLAYER,
+	E_EDIT_ENEMY
+};
+
+enum EntityType {
+	E_ENEMY
+};
+
+struct EntityEntry {
+	EntityType type;
+	int x;
+	int y;
 };
 
 // struct representing each file item in the menu
@@ -103,6 +121,7 @@ private:
 	ProgramState state;
 	EditorState editor_state;
 	EditMode edit_mode;
+	EntityEditMode e_edit_mode;
 	int current_tile;
 	bool pan_started;
 
@@ -113,6 +132,7 @@ private:
 	int start_x;
 	int start_y;
 	int num_entities;
+	std::vector<EntityEntry> entities;
 	std::string tilemap_source;
 	std::string background_source;
 	int map_width;

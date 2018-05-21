@@ -13,6 +13,7 @@ void Editor::init() {
 	state = STATE_EDITOR;
 	editor_state = EDITOR_EDIT;
 	edit_mode = EDIT_TILE;
+	e_edit_mode = E_EDIT_PLAYER;
 	current_tile = 0;
 	// intiialize editor variables
 	camera_x = 0, camera_y = 0;
@@ -35,6 +36,7 @@ void Editor::init() {
 	QcEngine::loadTexture(PALETTE_SELECT, PALETTE_SELECT_IMG);
 	// load entity textures
 	QcEngine::loadTexture(PLAYER, PLAYER_IMG);
+	QcEngine::loadTexture(ENEMY, ENEMY_IMG);
 	// initialize a default map
 	loadMap();
 	// initialize file things
@@ -136,6 +138,11 @@ void Editor::render() {
 		if (edit_mode == EDIT_ENTITIES) {
 			// render the player
 			QcEngine::getTexture(PLAYER)->render(start_x * tile_size - camera_x, start_y * tile_size - camera_y);
+			for (const EntityEntry& e : entities) {
+				if (e.type == E_ENEMY) {
+					QcEngine::getTexture(ENEMY)->render(e.x * tile_size - camera_x, e.y * tile_size - camera_y);
+				}
+			}
 		}
 	}
 }
@@ -193,52 +200,64 @@ void Editor::handleKeyPresses() {
 	} else {
 		if (editor_state != EDITOR_PANNING) editor_state = EDITOR_EDIT;
 	}
-	// using numbers to select a tile
-	if (keyDown(SDL_SCANCODE_1)) {
-		if (tiles->getNumTiles() >= 1) {
-			current_tile = 0;
+	if (state == STATE_EDITOR && edit_mode == EDIT_TILE) {
+		// using numbers to select a tile
+		if (keyDown(SDL_SCANCODE_1)) {
+			if (tiles->getNumTiles() >= 1) {
+				current_tile = 0;
+			}
+		}
+		if (keyDown(SDL_SCANCODE_2)) {
+			if (tiles->getNumTiles() >= 2) {
+				current_tile = 1;
+			}
+		}
+		if (keyDown(SDL_SCANCODE_3)) {
+			if (tiles->getNumTiles() >= 3) {
+				current_tile = 2;
+			}
+		}
+		if (keyDown(SDL_SCANCODE_4)) {
+			if (tiles->getNumTiles() >= 4) {
+				current_tile = 3;
+			}
+		}
+		if (keyDown(SDL_SCANCODE_5)) {
+			if (tiles->getNumTiles() >= 5) {
+				current_tile = 4;
+			}
+		}
+		if (keyDown(SDL_SCANCODE_6)) {
+			if (tiles->getNumTiles() >= 6) {
+				current_tile = 5;
+			}
+		}
+		if (keyDown(SDL_SCANCODE_7)) {
+			if (tiles->getNumTiles() >= 7) {
+				current_tile = 6;
+			}
+		}
+		if (keyDown(SDL_SCANCODE_8)) {
+			if (tiles->getNumTiles() >= 8) {
+				current_tile = 7;
+			}
+		}
+		if (keyDown(SDL_SCANCODE_9)) {
+			if (tiles->getNumTiles() >= 9) {
+				current_tile = 8;
+			}
 		}
 	}
-	if (keyDown(SDL_SCANCODE_2)) {
-		if (tiles->getNumTiles() >= 2) {
-			current_tile = 1;
+	if (state == STATE_EDITOR && edit_mode == EDIT_ENTITIES) {
+		// edit player
+		if (keyPressed(SDL_SCANCODE_1)) {
+			e_edit_mode = E_EDIT_PLAYER;
+		}
+		if (keyPressed(SDL_SCANCODE_2)) {
+			e_edit_mode = E_EDIT_ENEMY;
 		}
 	}
-	if (keyDown(SDL_SCANCODE_3)) {
-		if (tiles->getNumTiles() >= 3) {
-			current_tile = 2;
-		}
-	}
-	if (keyDown(SDL_SCANCODE_4)) {
-		if (tiles->getNumTiles() >= 4) {
-			current_tile = 3;
-		}
-	}
-	if (keyDown(SDL_SCANCODE_5)) {
-		if (tiles->getNumTiles() >= 5) {
-			current_tile = 4;
-		}
-	}
-	if (keyDown(SDL_SCANCODE_6)) {
-		if (tiles->getNumTiles() >= 6) {
-			current_tile = 5;
-		}
-	}
-	if (keyDown(SDL_SCANCODE_7)) {
-		if (tiles->getNumTiles() >= 7) {
-			current_tile = 6;
-		}
-	}
-	if (keyDown(SDL_SCANCODE_8)) {
-		if (tiles->getNumTiles() >= 8) {
-			current_tile = 7;
-		}
-	}
-	if (keyDown(SDL_SCANCODE_9)) {
-		if (tiles->getNumTiles() >= 9) {
-			current_tile = 8;
-		}
-	}
+	
 }
 
 void Editor::handleLeftMouseClick() {
@@ -250,6 +269,12 @@ void Editor::handleLeftMouseClick() {
 			pan_mouse_y = getMouseY();
 			pan_start_x = camera_x;
 			pan_start_y = camera_y;
+		}
+		if (editor_state == EDITOR_EDIT) {
+			if (e_edit_mode == E_EDIT_ENEMY) {
+				entities.push_back({ E_ENEMY, cur_tile_x, cur_tile_y });
+				num_entities++;
+			}
 		}
 	}
 	// TODO: generalize this so multiple things can ask for a file menu and have one be returned
@@ -319,9 +344,10 @@ void Editor::handleLeftMouseHeld() {
 			}
 			if (edit_mode == EDIT_ENTITIES) {
 				// the user is clicking to adjust the position of an entitiy
-				// TODO: add entity types other than just the player
-				start_x = cur_tile_x;
-				start_y = cur_tile_y;
+				if (e_edit_mode == E_EDIT_PLAYER) {
+					start_x = cur_tile_x;
+					start_y = cur_tile_y;
+				}
 			}
 		}
 	}
@@ -338,6 +364,17 @@ void Editor::handleRightMouseHeld() {
 			if (edit_mode == EDIT_COLLISION) {
 				collisionmap[current] = false;
 			}
+			if (edit_mode == EDIT_ENTITIES) {
+				if (e_edit_mode == E_EDIT_ENEMY) {
+					for (int i = 0; i < entities.size(); ++i){
+						if (cur_tile_x == entities[i].x && cur_tile_y == entities[i].y) {
+							entities.erase(entities.begin() + i);
+							num_entities--;
+							break;
+						}
+					}
+				}
+			}
 		}
 	}
 }
@@ -347,6 +384,7 @@ void Editor::resetMap() {
 	start_x = 0;
 	start_y = 0;
 	num_entities = 0;
+	entities.clear();
 	tilemap_source = DEFAULT_TILEMAP;
 	background_source = DEFAULT_BACKGROUND;
 	map_width = DEFAULT_MAP_WIDTH;
@@ -381,6 +419,18 @@ void Editor::loadMap(const std::string & path) {
 		map_file >> start_y;
 		map_file >> num_entities;
 		// TODO: Add entity data here somehow
+		for (int i = 0; i < num_entities; ++i) {
+			char type;
+			map_file >> type;
+			// ENEMY TYPE
+			if (type == 'E') {
+				int x;
+				int y;
+				map_file >> x;
+				map_file >> y;
+				entities.push_back({E_ENEMY, x, y});
+			}
+		}
 		map_file >> tilemap_source;
 		map_file >> background_source;
 		map_file >> map_width;
@@ -413,6 +463,13 @@ void Editor::saveMap(const std::string & path) {
 	map_file << start_x << '\n';
 	map_file << start_y << '\n';
 	map_file << num_entities << '\n';
+	for (const EntityEntry& e : entities) {
+		if (e.type == E_ENEMY) {
+			map_file << "E ";
+			map_file << e.x << ' ';
+			map_file << e.y << '\n';
+		}
+	}
 	map_file << tilemap_source << '\n';
 	map_file << background_source << '\n';
 	map_file << map_width << '\n';

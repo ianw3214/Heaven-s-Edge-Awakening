@@ -8,6 +8,7 @@
 
 #include "entities\gameObject.hpp"
 #include "entities\player.hpp"
+#include "entities\enemy.hpp"
 
 #define KEY_RIGHT	(1 << 0)
 #define KEY_LEFT	(1 << 1)
