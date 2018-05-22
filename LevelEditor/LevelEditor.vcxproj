@@ -121,10 +121,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\editor.cpp" />
+    <ClCompile Include="src\editor_state.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\editor.hpp" />
+    <ClInclude Include="src\util.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

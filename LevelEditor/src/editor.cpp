@@ -107,6 +107,7 @@ void Editor::render() {
 	QcEngine::getTexture(BORDER_CORNER)->render(map_width * tile_size - camera_x, -6 - camera_y);
 	QcEngine::getTexture(BORDER_CORNER)->render(map_width * tile_size - camera_x, map_height * tile_size - camera_y);
 	QcEngine::getTexture(BORDER_CORNER)->render(-6 - camera_x, map_height * tile_size - camera_y);
+	// render the files if we are in that state
 	if (state == STATE_FILE) {
 		for (unsigned int i = 0; i < files.size(); ++i) {
 			// if the mouse is hovering over current item, render white overlay
@@ -118,39 +119,7 @@ void Editor::render() {
 		}
 	}
 	if (state == STATE_EDITOR) {
-		// render the tile selection image
-		QcEngine::getTexture(TILE_SELECT)->render(cur_tile_x * tile_size - camera_x, cur_tile_y * tile_size - camera_y);
-		if (edit_mode == EDIT_TILE) {
-			// render the tile palette
-			QcEngine::getTexture(PALETTE_BASE)->render(palette_x, palette_y);
-			for (int i = 0; i < tiles->getNumTiles(); ++i) {
-				int x = (i % 3) * tile_size + 6 + palette_x;
-				int y = (i / 3) * tile_size + 6 + palette_y;
-				tiles->render(x, y, i);
-				if (i == current_tile) {
-					QcEngine::getTexture(PALETTE_SELECT)->render(x, y);
-				}
-			}
-		}
-		// render the collision boxes if user is currently editing collisions
-		if (edit_mode == EDIT_COLLISION) {
-			for (int i = 0; i < map_height; ++i) {
-				for (int j = 0; j < map_width; ++j) {
-					if (collisionmap[tileIndex(j, i)] == true) {
-						QcEngine::getTexture(COLLISION)->render(j * tile_size - camera_x, i * tile_size - camera_y);
-					}
-				}
-			}
-		}
-		if (edit_mode == EDIT_ENTITIES) {
-			// render the player
-			QcEngine::getTexture(PLAYER)->render(start_x * tile_size - camera_x, start_y * tile_size - camera_y);
-			for (const EntityEntry& e : entities) {
-				if (e.type == E_ENEMY) {
-					QcEngine::getTexture(ENEMY)->render(e.x * tile_size - camera_x, e.y * tile_size - camera_y);
-				}
-			}
-		}
+		renderEditor();
 	}
 	// render HUD
 	QcEngine::getTexture(ICON_TILE)->render(0, QcEngine::getCVARint("WINDOW HEIGHT") - 64);
@@ -171,131 +140,20 @@ void Editor::handleKeyPresses() {
 	if (keyPressed(SDL_SCANCODE_ESCAPE)) {
 		exit();
 	}
-	if (keyPressed(SDL_SCANCODE_SPACE)) {
-		editor_state = EDITOR_PANNING;
-	} else {
-		if (editor_state == EDITOR_PICK) editor_state = EDITOR_PICK; 
-		else editor_state = EDITOR_EDIT;
-		pan_started = false;
-	}
-	if (keyPressed(SDL_SCANCODE_UP)) {
-		camera_y -= static_cast<int>(delta * PAN_SPEED / 1000.f);
-	}
-	if (keyPressed(SDL_SCANCODE_DOWN)) {
-		camera_y += static_cast<int>(delta * PAN_SPEED / 1000.f);
-	}
-	if (keyPressed(SDL_SCANCODE_RIGHT)) {
-		camera_x += static_cast<int>(delta * PAN_SPEED / 1000.f);
-	}
-	if (keyPressed(SDL_SCANCODE_LEFT)) {
-		camera_x -= static_cast<int>(delta * PAN_SPEED / 1000.f);
-	}
-	// QWERTY for common controls
-	if (keyDown(SDL_SCANCODE_Q)) {
-		state = STATE_EDITOR;
-		edit_mode = EDIT_TILE;
-	}
-	if (keyDown(SDL_SCANCODE_W)) {
-		state = STATE_EDITOR;
-		edit_mode = EDIT_COLLISION;
-	}
-	if (keyDown(SDL_SCANCODE_E)) {
-		state = STATE_EDITOR;
-		edit_mode = EDIT_ENTITIES;
-	}
 	// temporary key to put file loading
 	if (keyDown(SDL_SCANCODE_R)) {
 		state = STATE_FILE;
 	}
-	if (keyDown(SDL_SCANCODE_S)) {
-		// TODO: move this somewhere else
-		saveMap(DEFAULT_MAP_FILE);
+	// handle editor key presses
+	if (state == STATE_EDITOR) {
+		handleKeyPressEditor();
 	}
-	// RESET THE MAP
-	if (keyDown(SDL_SCANCODE_DELETE)) {
-		resetMap();
-	}
-	if (keyPressed(SDL_SCANCODE_LALT)) {
-		if (editor_state != EDITOR_PANNING)editor_state = EDITOR_PICK;
-	} else {
-		if (editor_state != EDITOR_PANNING) editor_state = EDITOR_EDIT;
-	}
-	if (state == STATE_EDITOR && edit_mode == EDIT_TILE) {
-		// using numbers to select a tile
-		if (keyDown(SDL_SCANCODE_1)) {
-			if (tiles->getNumTiles() >= 1) {
-				current_tile = 0;
-			}
-		}
-		if (keyDown(SDL_SCANCODE_2)) {
-			if (tiles->getNumTiles() >= 2) {
-				current_tile = 1;
-			}
-		}
-		if (keyDown(SDL_SCANCODE_3)) {
-			if (tiles->getNumTiles() >= 3) {
-				current_tile = 2;
-			}
-		}
-		if (keyDown(SDL_SCANCODE_4)) {
-			if (tiles->getNumTiles() >= 4) {
-				current_tile = 3;
-			}
-		}
-		if (keyDown(SDL_SCANCODE_5)) {
-			if (tiles->getNumTiles() >= 5) {
-				current_tile = 4;
-			}
-		}
-		if (keyDown(SDL_SCANCODE_6)) {
-			if (tiles->getNumTiles() >= 6) {
-				current_tile = 5;
-			}
-		}
-		if (keyDown(SDL_SCANCODE_7)) {
-			if (tiles->getNumTiles() >= 7) {
-				current_tile = 6;
-			}
-		}
-		if (keyDown(SDL_SCANCODE_8)) {
-			if (tiles->getNumTiles() >= 8) {
-				current_tile = 7;
-			}
-		}
-		if (keyDown(SDL_SCANCODE_9)) {
-			if (tiles->getNumTiles() >= 9) {
-				current_tile = 8;
-			}
-		}
-	}
-	if (state == STATE_EDITOR && edit_mode == EDIT_ENTITIES) {
-		// edit player
-		if (keyPressed(SDL_SCANCODE_1)) {
-			e_edit_mode = E_EDIT_PLAYER;
-		}
-		if (keyPressed(SDL_SCANCODE_2)) {
-			e_edit_mode = E_EDIT_ENEMY;
-		}
-	}
-	
 }
 
 void Editor::handleLeftMouseClick() {
 	// the user is currently dragging the mouse around to pan the screen
 	if (state == STATE_EDITOR) {
-		if (editor_state == EDITOR_PANNING) {
-			pan_started = true;
-			pan_mouse_x = getMouseX();
-			pan_mouse_y = getMouseY();
-			pan_start_x = camera_x;
-			pan_start_y = camera_y;
-		}
-		if (editor_state == EDITOR_EDIT) {
-			if (e_edit_mode == E_EDIT_ENEMY) {
-				entities.push_back({ E_ENEMY, cur_tile_x, cur_tile_y });
-				num_entities++;
-			}
-		}
+		handleLeftMouseClickEditor();
 	}
 	// TODO: generalize this so multiple things can ask for a file menu and have one be returned
 	if (state == STATE_FILE) {
@@ -316,86 +174,13 @@ void Editor::handleLeftMouseClick() {
 
 void Editor::handleLeftMouseHeld() {
 	if (state == STATE_EDITOR) {
-		// the user clicked to start panning the camera around
-		if (editor_state == EDITOR_PANNING) {
-			if (!pan_started) {
-				pan_started = true;
-				pan_mouse_x = getMouseX();
-				pan_mouse_y = getMouseY();
-				pan_start_x = camera_x;
-				pan_start_y = camera_y;
-			}
-			camera_x = pan_start_x - getMouseX() + pan_mouse_x;
-			camera_y = pan_start_y - getMouseY() + pan_mouse_y;
-		}
-		if (editor_state == EDITOR_PICK) {
-			int cur = cur_tile_y * map_width + cur_tile_x;
-			if (edit_mode == EDIT_TILE) {
-				current_tile = tilemap[cur];
-			}
-			if (edit_mode == EDIT_COLLISION) {
-				// do nothing I guess :o
-			}
-		}
-		// the default click is to change the current tile
-		if (editor_state == EDITOR_EDIT) {
-			if (edit_mode == EDIT_TILE) {
-				// the user is clicking to switch palette tiles 
-				// TODO: remove magic numbers here
-				if (Math::isColliding(Vec2(getMouseX(), getMouseY()), Math::Rectangle(palette_x + 6, palette_y + 6, 196, 196))) {
-					int tile_x = (getMouseX() - palette_x - 6) / 64;
-					int tile_y = (getMouseY() - palette_y - 6) / 64;
-					int new_tile = tile_y * 3 + tile_x;
-					if (new_tile < tiles->getNumTiles()) {
-						current_tile = new_tile;
-					}
-				} else {
-					// the user is clicking to edit a tile
-					int current = tileIndex(cur_tile_x, cur_tile_y);
-					if (current < 0 || current > map_width * map_height - 1) return;
-					tilemap[current] = current_tile;
-				}
-			}
-			if (edit_mode == EDIT_COLLISION) {
-				// the user is clicking to edit a collision tile
-				int current = tileIndex(cur_tile_x, cur_tile_y);
-				if (current < 0 || current > map_width * map_height - 1) return;
-				collisionmap[current] = true;
-			}
-			if (edit_mode == EDIT_ENTITIES) {
-				// the user is clicking to adjust the position of an entitiy
-				if (e_edit_mode == E_EDIT_PLAYER) {
-					start_x = cur_tile_x;
-					start_y = cur_tile_y;
-				}
-			}
-		}
+		handleLeftMouseHeldEditor();
 	}
 }
 
 void Editor::handleRightMouseHeld() {
 	if (state == STATE_EDITOR) {
-		if (editor_state == EDITOR_EDIT) {
-			int current = tileIndex(cur_tile_x, cur_tile_y);
-			if (current < 0 || current > map_width * map_height - 1) return;
-			if (edit_mode == EDIT_TILE) {
-				tilemap[current] = -1;
-			}
-			if (edit_mode == EDIT_COLLISION) {
-				collisionmap[current] = false;
-			}
-			if (edit_mode == EDIT_ENTITIES) {
-				if (e_edit_mode == E_EDIT_ENEMY) {
-					for (int i = 0; i < entities.size(); ++i){
-						if (cur_tile_x == entities[i].x && cur_tile_y == entities[i].y) {
-							entities.erase(entities.begin() + i);
-							num_entities--;
-							break;
-						}
-					}
-				}
-			}
-		}
+		handleRightMouseHeldEditor();
 	}
 }
 
