@@ -44,6 +44,7 @@ private:
 	EntityEditMode e_edit_mode;
 	int current_tile;
 	bool pan_started;
+	bool show_HUD;
 
 	// -------------------------------------------------------------------------------
 	// MAP SETTINGS

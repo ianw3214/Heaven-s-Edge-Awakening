@@ -56,6 +56,15 @@
 #define SELECT_ENTITY		"entity_select_icon"
 #define SELECT_ENTITY_IMG	"../assets/editor/entity_icon_select.png"
 
+#define PLA_ENTITY_ICON		"pla_ent"
+#define PLA_ENTITY_ICON_IMG	"../assets/editor/player_entity_icon.png"
+#define PLA_ENTITY_SEL		"pla_ent_sel"
+#define PLA_ENTITY_SEL_IMG	"../assets/editor/player_entity_icon_select.png"
+#define ENE_ENTITY_ICON		"ene_ent"
+#define ENE_ENTITY_ICON_IMG "../assets/editor/enemy_entity_icon.png"
+#define ENE_ENTITY_SEL		"ene_ent_sel"
+#define ENE_ENTITY_SEL_IMG	"../assets/editor/enemy_entity_icon_select.png"
+
 enum ProgramState {
 	STATE_EDITOR,
 	STATE_FILE,

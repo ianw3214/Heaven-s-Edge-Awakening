@@ -8,14 +8,16 @@ void Editor::renderEditor() {
 	// render the tile selection image
 	QcEngine::getTexture(TILE_SELECT)->render(cur_tile_x * tile_size - camera_x, cur_tile_y * tile_size - camera_y);
 	if (edit_mode == EDIT_TILE) {
-		// render the tile palette
-		QcEngine::getTexture(PALETTE_BASE)->render(palette_x, palette_y);
-		for (int i = 0; i < tiles->getNumTiles(); ++i) {
-			int x = (i % 3) * tile_size + 6 + palette_x;
-			int y = (i / 3) * tile_size + 6 + palette_y;
-			tiles->render(x, y, i);
-			if (i == current_tile) {
-				QcEngine::getTexture(PALETTE_SELECT)->render(x, y);
+		if (show_HUD) {
+			// render the tile palette
+			QcEngine::getTexture(PALETTE_BASE)->render(palette_x, palette_y);
+			for (int i = 0; i < tiles->getNumTiles(); ++i) {
+				int x = (i % 3) * tile_size + 6 + palette_x;
+				int y = (i / 3) * tile_size + 6 + palette_y;
+				tiles->render(x, y, i);
+				if (i == current_tile) {
+					QcEngine::getTexture(PALETTE_SELECT)->render(x, y);
+				}
 			}
 		}
 	}
@@ -32,10 +34,37 @@ void Editor::renderEditor() {
 	if (edit_mode == EDIT_ENTITIES) {
 		// render the player
 		QcEngine::getTexture(PLAYER)->render(start_x * tile_size - camera_x, start_y * tile_size - camera_y);
+		// render the enemies
 		for (const EntityEntry& e : entities) {
 			if (e.type == E_ENEMY) {
 				QcEngine::getTexture(ENEMY)->render(e.x * tile_size - camera_x, e.y * tile_size - camera_y);
 			}
+		}
+		// render the entity options
+		if (show_HUD) {
+			QcEngine::getTexture(PLA_ENTITY_ICON)->render(0, 0);
+			QcEngine::getTexture(ENE_ENTITY_ICON)->render(0, 64);
+			if (e_edit_mode == E_EDIT_PLAYER) {
+				QcEngine::getTexture(PLA_ENTITY_SEL)->render(0, 0);
+			}
+			if (e_edit_mode == E_EDIT_ENEMY) {
+				QcEngine::getTexture(ENE_ENTITY_SEL)->render(0, 64);
+			}
+		}
+	}
+	// render editor HUD
+	if (show_HUD) {
+		QcEngine::getTexture(ICON_TILE)->render(0, QcEngine::getCVARint("WINDOW HEIGHT") - 64);
+		QcEngine::getTexture(ICON_COLLISION)->render(64, QcEngine::getCVARint("WINDOW HEIGHT") - 64);
+		QcEngine::getTexture(ICON_ENTITY)->render(128, QcEngine::getCVARint("WINDOW HEIGHT") - 64);
+		if (edit_mode == EDIT_TILE) {
+			QcEngine::getTexture(SELECT_TILE)->render(0, QcEngine::getCVARint("WINDOW HEIGHT") - 64);
+		}
+		if (edit_mode == EDIT_COLLISION) {
+			QcEngine::getTexture(SELECT_COLLISION)->render(64, QcEngine::getCVARint("WINDOW HEIGHT") - 64);
+		}
+		if (edit_mode == EDIT_ENTITIES) {
+			QcEngine::getTexture(SELECT_ENTITY)->render(128, QcEngine::getCVARint("WINDOW HEIGHT") - 64);
 		}
 	}
 }
@@ -153,24 +182,49 @@ void Editor::handleKeyPressEditor() {
 }
 
 void Editor::handleLeftMouseClickEditor() {
-	if (editor_state == EDITOR_PANNING) {
+	// check if the mouse clicks the editor state buttons first
+	Vec2 m_pos = Vec2(getMouseX(), getMouseY());
+	if (Math::isColliding(m_pos, Math::Rectangle(0, QcEngine::getCVARint("WINDOW HEIGHT") - 64, 64, 64))) {
+		edit_mode = EDIT_TILE;
+	} else if (Math::isColliding(m_pos, Math::Rectangle(64, QcEngine::getCVARint("WINDOW HEIGHT") - 64, 64, 64))) {
+		edit_mode = EDIT_COLLISION;
+	} else if (Math::isColliding(m_pos, Math::Rectangle(128, QcEngine::getCVARint("WINDOW HEIGHT") - 64, 64, 64))) {
+		edit_mode = EDIT_ENTITIES;
+	} else if (editor_state == EDITOR_PANNING) {
 		pan_started = true;
 		pan_mouse_x = getMouseX();
 		pan_mouse_y = getMouseY();
 		pan_start_x = camera_x;
 		pan_start_y = camera_y;
-	}
-	if (editor_state == EDITOR_EDIT) {
-		if (e_edit_mode == E_EDIT_ENEMY) {
-			entities.push_back({ E_ENEMY, cur_tile_x, cur_tile_y });
-			num_entities++;
+	} else if (editor_state == EDITOR_EDIT) {
+		if (edit_mode == EDIT_ENTITIES) {
+			// first check if the buttons were pressed
+			if (Math::isColliding(m_pos, Math::Rectangle(0, 0, 128, 64))) {
+				e_edit_mode = E_EDIT_PLAYER;
+			} else if (Math::isColliding(m_pos, Math::Rectangle(0, 64, 128, 64))) {
+				e_edit_mode = E_EDIT_ENEMY;
+			} 
+			// add an enemy if we are not clicking buttons
+			else if (e_edit_mode == E_EDIT_ENEMY) {
+				entities.push_back({ E_ENEMY, cur_tile_x, cur_tile_y });
+				num_entities++;
+			}
 		}
 	}
 }
 
 void Editor::handleLeftMouseHeldEditor() {
+	// check if the mouse clicks the editor state buttons first
+	Vec2 m_pos = Vec2(getMouseX(), getMouseY());
+	if (Math::isColliding(m_pos, Math::Rectangle(0, QcEngine::getCVARint("WINDOW HEIGHT") - 64, 64, 64))) {
+		edit_mode = EDIT_TILE;
+	} else if (Math::isColliding(m_pos, Math::Rectangle(64, QcEngine::getCVARint("WINDOW HEIGHT") - 64, 64, 64))) {
+		edit_mode = EDIT_COLLISION;
+	} else if (Math::isColliding(m_pos, Math::Rectangle(128, QcEngine::getCVARint("WINDOW HEIGHT") - 64, 64, 64))) {
+		edit_mode = EDIT_ENTITIES;
+	}
 	// the user clicked to start panning the camera around
-	if (editor_state == EDITOR_PANNING) {
+	else if (editor_state == EDITOR_PANNING) {
 		if (!pan_started) {
 			pan_started = true;
 			pan_mouse_x = getMouseX();
@@ -182,7 +236,7 @@ void Editor::handleLeftMouseHeldEditor() {
 		camera_y = pan_start_y - getMouseY() + pan_mouse_y;
 	}
 	// the user clicked to pick a tile from the current map
-	if (editor_state == EDITOR_PICK) {
+	else if (editor_state == EDITOR_PICK) {
 		int cur = cur_tile_y * map_width + cur_tile_x;
 		if (edit_mode == EDIT_TILE) {
 			current_tile = tilemap[cur];
@@ -192,7 +246,7 @@ void Editor::handleLeftMouseHeldEditor() {
 		}
 	}
 	// the default click is to change the current tile
-	if (editor_state == EDITOR_EDIT) {
+	else if (editor_state == EDITOR_EDIT) {
 		if (edit_mode == EDIT_TILE) {
 			// the user is clicking to switch palette tiles 
 			// TODO: remove magic numbers here
@@ -217,8 +271,14 @@ void Editor::handleLeftMouseHeldEditor() {
 			collisionmap[current] = true;
 		}
 		if (edit_mode == EDIT_ENTITIES) {
+			// first check if the buttons were pressed
+			if (Math::isColliding(m_pos, Math::Rectangle(0, 0, 128, 64))) {
+				e_edit_mode = E_EDIT_PLAYER;
+			} else if (Math::isColliding(m_pos, Math::Rectangle(0, 64, 128, 64))) {
+				e_edit_mode = E_EDIT_ENEMY;
+			}
 			// the user is clicking to adjust the position of an entitiy
-			if (e_edit_mode == E_EDIT_PLAYER) {
+			else if (e_edit_mode == E_EDIT_PLAYER) {
 				start_x = cur_tile_x;
 				start_y = cur_tile_y;
 			}
