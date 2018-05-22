@@ -93,7 +93,7 @@ void Editor::handleKeyPressEditor() {
 	}
 	if (keyDown(SDL_SCANCODE_S)) {
 		// TODO: move this somewhere else
-		saveMap(DEFAULT_MAP_FILE);
+		state = STATE_SAVEMAP;
 	}
 	// RESET THE MAP
 	if (keyDown(SDL_SCANCODE_DELETE)) {

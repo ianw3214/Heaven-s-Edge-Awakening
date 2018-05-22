@@ -49,6 +49,8 @@ void Editor::init() {
 	QcEngine::loadTexture(PLA_ENTITY_SEL, PLA_ENTITY_SEL_IMG);
 	QcEngine::loadTexture(ENE_ENTITY_ICON, ENE_ENTITY_ICON_IMG);
 	QcEngine::loadTexture(ENE_ENTITY_SEL, ENE_ENTITY_SEL_IMG);
+	// load MISC textures
+	QcEngine::loadTexture(SAVEMAP, SAVEMAP_IMG);
 	// initialize a default map
 	loadMap();
 	// initialize file things
@@ -126,16 +128,48 @@ void Editor::render() {
 	if (state == STATE_EDITOR) {
 		renderEditor();
 	}
+	if (state == STATE_SAVEMAP) {
+		int x = (QcEngine::getCVARint("WINDOW WIDTH") - QcEngine::getTexture(SAVEMAP)->getWidth()) / 2;
+		int y = (QcEngine::getCVARint("WINDOW HEIGHT") - QcEngine::getTexture(SAVEMAP)->getHeight()) / 2;
+		QcEngine::getTexture(SAVEMAP)->render(x, y);
+		// render text if there is any
+		const std::string& ref = managerRef->getTextInput();
+		if (ref.size() > 0) {
+			SDL_Texture * text_texture = getTextTexture(ref, "default_16", { 0, 0, 0 });
+			Texture * tex = new Texture(text_texture);
+			tex->render(530, 350);
+		}
+	}
 }
 
 void Editor::handleKeyPresses() {
-	if (keyPressed(SDL_SCANCODE_ESCAPE)) {
-		exit();
+	// use the escape key to return a state
+	if (keyDown(SDL_SCANCODE_ESCAPE)) {
+		if (state == STATE_SAVEMAP) {
+			state = STATE_EDITOR;
+		} else {
+			exit();
+		}
 	}
+	if (keyDown(SDL_SCANCODE_RETURN)) {
+		if (state == STATE_SAVEMAP) {
+			const std::string& ref = managerRef->getTextInput();
+			if (ref.size() > 0) {
+				std::string dest = DEFAULT_MAP_FOLDER + ref + ".txt";
+				saveMap(dest);
+			} else {
+				saveMap(DEFAULT_MAP_FILE);
+			}
+			state = STATE_EDITOR;
+			managerRef->stopTextInput();
+		}
+	}
+	/*
 	// temporary key to put file loading
 	if (keyDown(SDL_SCANCODE_R)) {
 		state = STATE_FILE;
 	}
+	*/
 	// handle editor key presses
 	if (state == STATE_EDITOR) {
 		handleKeyPressEditor();
@@ -164,6 +198,15 @@ void Editor::handleLeftMouseClick() {
 				tiles->generateTiles(DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE);
 				break;
 			}
+		}
+	}
+	// if the user clicks the box, focus in to handle text input
+	if (state == STATE_SAVEMAP) {
+		Vec2 m_pos = Vec2(getMouseX(), getMouseY());
+		int x = (QcEngine::getCVARint("WINDOW WIDTH") - QcEngine::getTexture(SAVEMAP)->getWidth()) / 2;
+		int y = (QcEngine::getCVARint("WINDOW HEIGHT") - QcEngine::getTexture(SAVEMAP)->getHeight()) / 2;
+		if (Math::isColliding(m_pos, Math::Rectangle(x, y, 256, 128))) {
+			managerRef->startTextInput();
 		}
 	}
 }

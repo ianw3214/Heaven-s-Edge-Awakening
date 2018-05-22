@@ -31,6 +31,10 @@ bool Player::onGround() const {
 	return on_ground;
 }
 
+const Math::Rectangle & Player::getCollision() const {
+	return collision;
+}
+
 void Player::render() {
 	texture->render(x - data->cam_x, y - data->cam_y);
 	// render the charge/tick

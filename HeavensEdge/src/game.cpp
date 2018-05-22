@@ -18,7 +18,8 @@ void Game::init() {
 	data->cam_y = 0;
 	// initialize textures
 	tiles = nullptr;
-	QcEngine::loadTexture("arrow", "../assets/arrow.png");
+	QcEngine::loadTexture(ARROW, ARROW_IMG);
+	QcEngine::loadTexture(PORTAL, PORTAL_IMG);
 	AnimatedTexture * t = static_cast<AnimatedTexture*>(QcEngine::loadTexture("enemy", "../assets/enemy.png", T_ANIMATED));
 	t->generateAtlas(64, 128);
 	t->addAnimationState({ 0, 3 });
@@ -53,6 +54,12 @@ void Game::update() {
 	}
 	// call any other game update functions there are
 	updateCamera();
+	// -------------------------------------------------------------------------------
+	// DEBUG CODE
+	// -------------------------------------------------------------------------------
+	if (Math::isColliding(player->getCollision(), Math::Rectangle(DEBUG_X, DEBUG_Y, 64, 128))) {
+
+	}
 }
 
 void Game::render() {
@@ -70,6 +77,10 @@ void Game::render() {
 	for (GameObject* obj : data->entities) {
 		obj->render();
 	}
+	// -------------------------------------------------------------------------------
+	// DEBUG CODE
+	// -------------------------------------------------------------------------------
+	QcEngine::getTexture(PORTAL)->render(DEBUG_X, DEBUG_Y);
 }
 
 void Game::handleKeyPresses() {

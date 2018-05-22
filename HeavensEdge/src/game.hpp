@@ -22,6 +22,14 @@
 
 #define TILEMAP	"tilemap"
 
+#define ARROW		"arrow"
+#define ARROW_IMG	"../assets/arrow.png"
+#define PORTAL		"portal"
+#define PORTAL_IMG	"../assets/portal.png"
+
+#define DEBUG_X		(10 * 64)
+#define DEBUG_Y		(10 * 64)
+
 struct GameData {
 	// -------------------------------------------------------------------------------
 	// GAME ENTITIES

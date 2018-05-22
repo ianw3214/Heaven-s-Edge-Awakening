@@ -33,6 +33,7 @@ public:
 	int getY() const;
 	bool facingRight() const;
 	bool onGround() const;
+	const Math::Rectangle& getCollision() const;
 
 	void render();
 	void update(Uint32 delta);

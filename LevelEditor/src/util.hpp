@@ -11,6 +11,7 @@
 #define DEFAULT_TILEMAP		"../assets/tilemap.png"
 #define DEFAULT_BACKGROUND	"../assets/parallax_test.png"
 
+#define DEFAULT_MAP_FOLDER	"../assets/maps/"
 #define DEFAULT_MAP_FILE	"../assets/maps/default.txt"
 
 #define DEFAULT_PALETTE_X	0
@@ -65,10 +66,15 @@
 #define ENE_ENTITY_SEL		"ene_ent_sel"
 #define ENE_ENTITY_SEL_IMG	"../assets/editor/enemy_entity_icon_select.png"
 
+// MISC SPRITE DEFINITIONS
+#define SAVEMAP				"savemap"
+#define SAVEMAP_IMG			"../assets/editor/savemap_bg.png"
+
 enum ProgramState {
 	STATE_EDITOR,
 	STATE_FILE,
-	STATE_SETTINGS
+	STATE_SETTINGS,
+	STATE_SAVEMAP
 };
 
 enum EditorState {
