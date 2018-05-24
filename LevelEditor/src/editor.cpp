@@ -250,44 +250,26 @@ void Editor::loadMap(const std::string & path) {
 	// open the map file to read
 	std::fstream map_file;
 	map_file.open(path, std::fstream::in);
+	// load the map data
 	if (map_file.is_open()) {
-		// check a version number
-		int version;
-		map_file >> version;
-		if (version != 1) {
-			resetMap();
-			saveMap(path);
-		}
-		map_file >> tile_size;
-		map_file >> start_x;
-		map_file >> start_y;
-		map_file >> num_entities;
-		// TODO: Add entity data here somehow
-		for (int i = 0; i < num_entities; ++i) {
-			char type;
-			map_file >> type;
-			// ENEMY TYPE
-			if (type == 'E') {
-				int x;
-				int y;
-				map_file >> x;
-				map_file >> y;
-				entities.push_back({E_ENEMY, x, y});
+		json map_data;
+		map_file >> map_data;
+		tile_size = map_data["tile size"];
+		start_x = map_data["start x"];
+		start_y = map_data["start y"];
+		num_entities = map_data["entity count"];
+		for (const auto& entity : map_data["entities"]) {
+			if (entity["type"] == "E") {
+				entities.push_back({ E_ENEMY, entity["x"], entity["y"] });
 			}
 		}
-		map_file >> tilemap_source;
-		map_file >> background_source;
-		map_file >> map_width;
-		map_file >> map_height;
-		int tile;
-		for (int i = 0; i < map_width * map_height; ++i) {
-			map_file >> tile;
-			tilemap.push_back(tile);
-		}
-		for (int i = 0; i < map_width * map_height; ++i) {
-			map_file >> tile;
-			collisionmap.push_back(tile);
-		}
+		tilemap_source = map_data["tilemap source"].get<std::string>();
+		background_source = map_data["background source"].get<std::string>();
+		map_width = map_data["map width"];
+		map_height = map_data["map height"];
+		tilemap = map_data["tiles"].get<std::vector<int>>();
+		collisionmap = map_data["collision"].get<std::vector<bool>>();
+		std::cout << map_data.dump(4) << std::endl;
 		map_file.close();
 	} else {
 		map_file.close();
@@ -299,38 +281,27 @@ void Editor::loadMap(const std::string & path) {
 }
 
 void Editor::saveMap(const std::string & path) {
+
 	std::fstream map_file;
-	// create a new file to work with
 	map_file.open(path, std::fstream::out);
-	map_file << 1 << '\n';			// VERSION NUMBER
-	map_file << tile_size << '\n';
-	map_file << start_x << '\n';
-	map_file << start_y << '\n';
-	map_file << num_entities << '\n';
+
+	json map_data;
+	map_data["tile size"] = tile_size;
+	map_data["start x"] = start_x;
+	map_data["start y"] = start_y;
+	map_data["entity count"] = num_entities;
+	map_data["entities"] = json::array();
 	for (const EntityEntry& e : entities) {
-		if (e.type == E_ENEMY) {
-			map_file << "E ";
-			map_file << e.x << ' ';
-			map_file << e.y << '\n';
-		}
+		map_data["entities"].push_back(json::object({ { "type", "enemy" }, { "x", e.x }, { "y", e.y } }));
 	}
-	map_file << tilemap_source << '\n';
-	map_file << background_source << '\n';
-	map_file << map_width << '\n';
-	map_file << map_height << '\n';
-	for (int i = 0; i < map_height; ++i) {
-		for (int j = 0; j < map_width; ++j) {
-			map_file << tilemap[tileIndex(j, i)] << ' ';
-		}
-		map_file << '\n';
-	}
-	for (int i = 0; i < map_height; ++i) {
-		for (int j = 0; j < map_width; ++j) {
-			map_file << collisionmap[tileIndex(j, i)] << ' ';
-		}
-		map_file << '\n';
-	}
+	map_data["tilemap source"] = tilemap_source;
+	map_data["background source"] = background_source;
+	map_data["map width"] = map_width;
+	map_data["map height"] = map_height;
+	map_data["tiles"] = tilemap;
+	map_data["collision"] = collisionmap;
+
+	map_file << map_data;
+
 	map_file.close();
-
-
 }
