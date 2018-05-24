@@ -331,4 +331,6 @@ void Editor::saveMap(const std::string & path) {
 		map_file << '\n';
 	}
 	map_file.close();
+
+
 }

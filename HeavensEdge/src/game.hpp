@@ -27,8 +27,8 @@
 #define PORTAL		"portal"
 #define PORTAL_IMG	"../assets/portal.png"
 
-#define DEBUG_X		(10 * 64)
-#define DEBUG_Y		(10 * 64)
+#define DEBUG_X		(8 * 64)
+#define DEBUG_Y		(6 * 64)
 
 struct GameData {
 	// -------------------------------------------------------------------------------
@@ -62,6 +62,7 @@ class Game : public State {
 public:
 
 	Game();
+	Game(const std::string& path);
 	~Game();
 
 	void init();
@@ -81,6 +82,10 @@ private:
 	// the tilemap is just a pointer, no ownership
 	TileMap * tiles;
 
+	// variables to keep track of map transitions and data
+	std::string current_map;
+	bool next_state;
+
 	// -------------------------------------------------------------------------------
 	// UTILITY FUNCTIONS
 	// -------------------------------------------------------------------------------
@@ -88,7 +93,7 @@ private:
 	void addEntity(GameObject * obj);
 	void updateCamera();
 	void clearMap();
-	void loadMap(const std::string& path = DEFAULT_MAP_FILE);
+	void loadMap(const std::string& path = DEFAULT_MAP_FILE, bool verbose = false);
 	
 	inline int tileIndex(int x, int y) const {
 		return y * data->map_width + x;

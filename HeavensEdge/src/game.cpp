@@ -3,11 +3,15 @@
 #include "entities\enemy.hpp"
 
 Game::Game() {
+	current_map = DEFAULT_MAP_FILE;
+}
 
+Game::Game(const std::string& path) {
+	current_map = path;
 }
 
 Game::~Game() {
-
+	
 }
 
 void Game::init() {
@@ -24,7 +28,11 @@ void Game::init() {
 	t->generateAtlas(64, 128);
 	t->addAnimationState({ 0, 3 });
 	// load the map data from a specified path
-	loadMap();
+	loadMap(current_map, true);
+	// adjust the camera to be centered on the player
+	// TODO: get rid of the magic numbers
+	data->cam_x = player->getX() - 1280 / 2;
+	data->cam_y = player->getY() - 720 / 2;
 }
 
 void Game::cleanup() {
@@ -57,8 +65,8 @@ void Game::update() {
 	// -------------------------------------------------------------------------------
 	// DEBUG CODE
 	// -------------------------------------------------------------------------------
-	if (Math::isColliding(player->getCollision(), Math::Rectangle(DEBUG_X, DEBUG_Y, 64, 128))) {
-
+	if (next_state) {
+		changeState(std::make_unique<Game>("../assets/maps/test.txt"));
 	}
 }
 
@@ -80,7 +88,7 @@ void Game::render() {
 	// -------------------------------------------------------------------------------
 	// DEBUG CODE
 	// -------------------------------------------------------------------------------
-	QcEngine::getTexture(PORTAL)->render(DEBUG_X, DEBUG_Y);
+	QcEngine::getTexture(PORTAL)->render(DEBUG_X - data->cam_x, DEBUG_Y - data->cam_y);
 }
 
 void Game::handleKeyPresses() {
@@ -90,6 +98,7 @@ void Game::handleKeyPresses() {
 	if (keyPressed(SDL_SCANCODE_ESCAPE)) {
 		exit();
 	}
+	// update the key states
 	if (keyPressed(SDL_SCANCODE_RIGHT)) {
 		data->keyStates |= KEY_RIGHT;
 	}
@@ -104,6 +113,15 @@ void Game::handleKeyPresses() {
 	}
 	if (keyUp(SDL_SCANCODE_Z)) {
 		data->keyStates |= KEY_ATTACK_UP;
+	}
+	// handle map transitions if needed
+	if (keyDown(SDL_SCANCODE_UP)) {
+		// -------------------------------------------------------------------------------
+		// DEBUG CODE
+		// -------------------------------------------------------------------------------
+		if (Math::isColliding(player->getCollision(), Math::Rectangle(DEBUG_X, DEBUG_Y, 64, 128))) {
+			next_state = true;
+		}
 	}
 }
 
@@ -209,7 +227,8 @@ bool GameData::collidingWithTiles(const Math::Shape & collision, int range, bool
 	return false;
 }
 
-void Game::loadMap(const std::string & path) {
+void Game::loadMap(const std::string & path, bool verbose) {
+	if (verbose) LOG("LOADING MAP: " << path);
 	// things to be loaded
 	int start_x;
 	int start_y;
@@ -228,11 +247,14 @@ void Game::loadMap(const std::string & path) {
 			// handle "VERSION INVALID" error
 		}
 		map_file >> data->tile_size;
+		if (verbose) LOG("TILE SIZE: " << data->tile_size);
 		map_file >> start_x;
 		map_file >> start_y;
+		if (verbose) LOG("START POS: " << start_x << ", " << start_y);
 		// TODO: handle this correctly
 		int num_entities;
 		map_file >> num_entities;
+		if (verbose) LOG("ENTITIES: " << num_entities);
 		for (int i = 0; i < num_entities; ++i) {
 			char type;
 			map_file >> type;
@@ -242,13 +264,18 @@ void Game::loadMap(const std::string & path) {
 				map_file >> x;
 				map_file >> y;
 				addEntity(new Enemy(x * data->tile_size, y * data->tile_size));
+				if (verbose) LOG(i + 1<< ") ENEMY SPAWNED AT: " << x << ", " << y);
 			}
 		}
 		// TODO: handle this correctly
 		map_file >> tilemap_source;
+		if (verbose) LOG("TILEMAP SOURCE: " << tilemap_source);
 		map_file >> background_source;
+		if (verbose) LOG("BACKGROUND SOURCE: " << background_source);
 		map_file >> data->map_width;
 		map_file >> data->map_height;
+		if (verbose) LOG("MAP WIDTH: " << data->map_width);
+		if (verbose) LOG("MAP HEIGHT: " << data->map_height);
 		int tile;
 		for (int i = 0; i < data->map_width * data->map_height; ++i) {
 			map_file >> tile;

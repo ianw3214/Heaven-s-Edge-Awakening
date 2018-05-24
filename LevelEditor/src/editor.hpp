@@ -6,7 +6,10 @@
 #include <fstream>
 #include <experimental/filesystem>
 
+#include <nlohmann\json.hpp>
+
 namespace fs = std::experimental::filesystem::v1;
+using json = nlohmann::json;
 
 #include "util.hpp"
 

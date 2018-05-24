@@ -7,6 +7,8 @@
 #define PLAYER_WIDTH 64
 #define PLAYER_HEIGHT 128
 
+#define PLAYER_X_MARGIN 32
+
 #define PLAYER_SPEED 500
 #define PLAYER_JUMP_VEL 1600
 

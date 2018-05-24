@@ -52,7 +52,7 @@ void Player::update(Uint32 delta) {
 	// handle player based on key states
 	handleKeyStates(delta);
 	// TODO: REMOVE MAGIC NUMBERS HERE
-	Math::Rectangle top_test = Math::Rectangle(x, y - 1, PLAYER_WIDTH, PLAYER_HEIGHT);
+	Math::Rectangle top_test = Math::Rectangle(x + PLAYER_X_MARGIN, y - 1, PLAYER_WIDTH, PLAYER_HEIGHT);
 	if (jumping && data->collidingWithTiles(top_test)) {
 		y_vel = -y_vel / 4.f;
 	}
@@ -62,7 +62,7 @@ void Player::update(Uint32 delta) {
 		move(DIR_DOWN, static_cast<int>(y_vel * delta / 1000.f));
 	}
 	// if the player is on the ground, set jumping to false again
-	Math::Rectangle bottom_test = Math::Rectangle(x, y + 1, PLAYER_WIDTH, PLAYER_HEIGHT);
+	Math::Rectangle bottom_test = Math::Rectangle(x + PLAYER_X_MARGIN, y + 1, PLAYER_WIDTH, PLAYER_HEIGHT);
 	if (data->collidingWithTiles(bottom_test)) {
 		on_ground = true;
 		jumping = false;
@@ -96,7 +96,8 @@ void Player::update(Uint32 delta) {
 void Player::init() {
 	// SETUP TEXTURE DATA
 	texture = static_cast<AnimatedTexture*>(QcEngine::loadTexture("player", "../assets/player.png", T_ANIMATED));
-	texture->generateAtlas(64, 128);
+	texture->generateAtlas(128, 128);
+	texture->changeFPS(16);
 	texture->addAnimationState({ 0, 3 });		// IDLE RIGHT
 	texture->addAnimationState({ 4, 7 });		// IDLE LEFT
 	texture->addAnimationState({ 8, 11 });		// RUN RIGHT
@@ -107,7 +108,7 @@ void Player::init() {
 	texture->addAnimationState({ 28, 31 });		// AIR LEFT
 	current_animation = PLAYER_LEFT_IDLE;
 	// SETUP COLLISION DATA
-	collision = Math::Rectangle(x, y, PLAYER_WIDTH, PLAYER_HEIGHT);
+	collision = Math::Rectangle(x + PLAYER_X_MARGIN, y, PLAYER_WIDTH, PLAYER_HEIGHT);
 	// INITIALIZE ADDITIONAL NEEDED TEXTURES
 	QcEngine::loadTexture("charge", "../assets/charge.png");
 	QcEngine::loadTexture("tick", "../assets/tick.png");
@@ -162,12 +163,12 @@ void Player::move(Direction dir, int distance) {
 	if (dir == DIR_RIGHT) x += distance;
 	if (dir == DIR_DOWN) y += distance;
 	if (dir == DIR_LEFT) x -= distance;
-	collision.pos = Vec2(x, y);
+	collision.pos = Vec2(x + PLAYER_X_MARGIN, y);
 	// tick represents how much to dial back on each iteration
 	int tick = (dir == DIR_UP || dir == DIR_LEFT ? -1 : 1) * (distance / std::abs(distance));
-	while (data->collidingWithTiles(collision, 3)) {
+	while (data->collidingWithTiles(collision, 3, true)) {
 		if (dir == DIR_UP || dir == DIR_DOWN) y -= tick;
 		if (dir == DIR_RIGHT || dir == DIR_LEFT) x -= tick;
-		collision.pos = Vec2(x, y);
+		collision.pos = Vec2(x + PLAYER_X_MARGIN, y);
 	}
 }
