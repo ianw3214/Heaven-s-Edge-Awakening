@@ -239,55 +239,40 @@ void Game::loadMap(const std::string & path, bool verbose) {
 	// open the map file to read
 	std::fstream map_file;
 	map_file.open(path, std::fstream::in);
+	// load the map data
 	if (map_file.is_open()) {
-		// check a version number
-		int version;
-		map_file >> version;
-		if (version != 1) {
-			// handle "VERSION INVALID" error
-		}
-		map_file >> data->tile_size;
-		if (verbose) LOG("TILE SIZE: " << data->tile_size);
-		map_file >> start_x;
-		map_file >> start_y;
-		if (verbose) LOG("START POS: " << start_x << ", " << start_y);
-		// TODO: handle this correctly
-		int num_entities;
-		map_file >> num_entities;
-		if (verbose) LOG("ENTITIES: " << num_entities);
-		for (int i = 0; i < num_entities; ++i) {
-			char type;
-			map_file >> type;
-			if (type == 'E') {	// ENEMY
-				int x;
-				int y;
-				map_file >> x;
-				map_file >> y;
-				addEntity(new Enemy(x * data->tile_size, y * data->tile_size));
-				if (verbose) LOG(i + 1<< ") ENEMY SPAWNED AT: " << x << ", " << y);
+		try {
+			json map_data;
+			map_file >> map_data;
+			data->tile_size = map_data["tile size"];
+			if (verbose) LOG("TILE SIZE: " << data->tile_size);
+			start_x = map_data["start x"];
+			start_y = map_data["start y"];
+			if (verbose) LOG("START POS: " << start_x << ", " << start_y);
+			for (const auto& entity : map_data["entities"]) {
+				if (entity["type"] == "enemy") {
+					addEntity(new Enemy(entity["x"] * data->tile_size, entity["y"] * data->tile_size));
+					if (verbose) LOG("ENEMY SPAWNED AT: " << entity["x"] << ", " << entity["y"]);
+				}
 			}
+			tilemap_source = map_data["tilemap source"].get<std::string>();
+			if (verbose) LOG("TILEMAP SOURCE: " << tilemap_source);
+			background_source = map_data["background source"].get<std::string>();
+			if (verbose) LOG("BACKGROUND SOURCE: " << background_source);
+			data->map_width = map_data["map width"];
+			data->map_height = map_data["map height"];
+			if (verbose) LOG("MAP WIDTH: " << data->map_width);
+			if (verbose) LOG("MAP HEIGHT: " << data->map_height);
+			data->tilemap = map_data["tiles"].get<std::vector<int>>();
+			data->collisionmap = map_data["collision"].get<std::vector<bool>>();
+			map_file.close();
+		} catch (const std::exception& e) {
+			std::cerr << e.what();
+			// handle "WRONG MAP FORMAT" error
 		}
-		// TODO: handle this correctly
-		map_file >> tilemap_source;
-		if (verbose) LOG("TILEMAP SOURCE: " << tilemap_source);
-		map_file >> background_source;
-		if (verbose) LOG("BACKGROUND SOURCE: " << background_source);
-		map_file >> data->map_width;
-		map_file >> data->map_height;
-		if (verbose) LOG("MAP WIDTH: " << data->map_width);
-		if (verbose) LOG("MAP HEIGHT: " << data->map_height);
-		int tile;
-		for (int i = 0; i < data->map_width * data->map_height; ++i) {
-			map_file >> tile;
-			data->tilemap.push_back(tile);
-		}
-		for (int i = 0; i < data->map_width * data->map_height; ++i) {
-			map_file >> tile;
-			data->collisionmap.push_back(tile);
-		}
-		map_file.close();
 	} else {
-		// handle "LOAD FAILED" error
+		map_file.close();
+		// hanlde "LOAD FAILED" error
 	}
 	// assume the file loaded successfully for now
 	player = new Player(start_x * data->tile_size, start_y * data->tile_size);	// starting position in tile coords

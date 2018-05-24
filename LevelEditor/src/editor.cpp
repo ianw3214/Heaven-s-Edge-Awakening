@@ -227,7 +227,6 @@ void Editor::resetMap() {
 	tile_size = DEFAULT_TILE_SIZE;
 	start_x = 0;
 	start_y = 0;
-	num_entities = 0;
 	entities.clear();
 	tilemap_source = DEFAULT_TILEMAP;
 	background_source = DEFAULT_BACKGROUND;
@@ -252,25 +251,30 @@ void Editor::loadMap(const std::string & path) {
 	map_file.open(path, std::fstream::in);
 	// load the map data
 	if (map_file.is_open()) {
-		json map_data;
-		map_file >> map_data;
-		tile_size = map_data["tile size"];
-		start_x = map_data["start x"];
-		start_y = map_data["start y"];
-		num_entities = map_data["entity count"];
-		for (const auto& entity : map_data["entities"]) {
-			if (entity["type"] == "E") {
-				entities.push_back({ E_ENEMY, entity["x"], entity["y"] });
+		try{
+			json map_data;
+			map_file >> map_data;
+			tile_size = map_data["tile size"];
+			start_x = map_data["start x"];
+			start_y = map_data["start y"];
+			for (const auto& entity : map_data["entities"]) {
+				if (entity["type"] == "enemy") {
+					entities.push_back({ E_ENEMY, entity["x"], entity["y"] });
+				}
 			}
+			tilemap_source = map_data["tilemap source"].get<std::string>();
+			background_source = map_data["background source"].get<std::string>();
+			map_width = map_data["map width"];
+			map_height = map_data["map height"];
+			tilemap = map_data["tiles"].get<std::vector<int>>();
+			collisionmap = map_data["collision"].get<std::vector<bool>>();
+			map_file.close();
+		} catch(const std::exception& e) {
+			std::cerr << e.what();
+			map_file.close();
+			resetMap();
+			saveMap(path);
 		}
-		tilemap_source = map_data["tilemap source"].get<std::string>();
-		background_source = map_data["background source"].get<std::string>();
-		map_width = map_data["map width"];
-		map_height = map_data["map height"];
-		tilemap = map_data["tiles"].get<std::vector<int>>();
-		collisionmap = map_data["collision"].get<std::vector<bool>>();
-		std::cout << map_data.dump(4) << std::endl;
-		map_file.close();
 	} else {
 		map_file.close();
 		// hanlde "LOAD FAILED" error
@@ -289,10 +293,10 @@ void Editor::saveMap(const std::string & path) {
 	map_data["tile size"] = tile_size;
 	map_data["start x"] = start_x;
 	map_data["start y"] = start_y;
-	map_data["entity count"] = num_entities;
 	map_data["entities"] = json::array();
 	for (const EntityEntry& e : entities) {
-		map_data["entities"].push_back(json::object({ { "type", "enemy" }, { "x", e.x }, { "y", e.y } }));
+		json entity = { {"type", "enemy"}, {"x", e.x}, {"y", e.y} };
+		map_data["entities"].push_back(entity);
 	}
 	map_data["tilemap source"] = tilemap_source;
 	map_data["background source"] = background_source;
@@ -302,6 +306,7 @@ void Editor::saveMap(const std::string & path) {
 	map_data["collision"] = collisionmap;
 
 	map_file << map_data;
+	std::cout << map_data.dump(4) << std::endl;
 
 	map_file.close();
 }

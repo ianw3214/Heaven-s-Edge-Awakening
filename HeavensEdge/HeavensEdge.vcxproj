@@ -86,7 +86,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)engine\includes;$(SolutionDir)libs\SDL2-2.0.7\include;$(SolutionDir)libs\SDL2_ttf-2.0.14\include;$(SolutionDir)libs\openAL\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\ianw3214\workspace\HeavensEdge\libs\json\include;$(SolutionDir)engine\includes;$(SolutionDir)libs\SDL2-2.0.7\include;$(SolutionDir)libs\SDL2_ttf-2.0.14\include;$(SolutionDir)libs\openAL\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)engine\lib;$(SolutionDir)libs\SDL2-2.0.7\lib;$(SolutionDir)libs\SDL2_ttf-2.0.14\lib;$(SolutionDir)libs\openAL\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
   </PropertyGroup>
@@ -99,7 +99,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)engine\includes;$(SolutionDir)libs\SDL2-2.0.7\include;$(SolutionDir)libs\SDL2_ttf-2.0.14\include;$(SolutionDir)libs\openAL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ianw3214\workspace\HeavensEdge\libs\json\include;$(SolutionDir)engine\includes;$(SolutionDir)libs\SDL2-2.0.7\include;$(SolutionDir)libs\SDL2_ttf-2.0.14\include;$(SolutionDir)libs\openAL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>

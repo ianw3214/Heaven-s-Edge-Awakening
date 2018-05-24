@@ -12,7 +12,7 @@
 #define DEFAULT_BACKGROUND	"../assets/parallax_test.png"
 
 #define DEFAULT_MAP_FOLDER	"../assets/maps/"
-#define DEFAULT_MAP_FILE	"../assets/maps/json.txt"
+#define DEFAULT_MAP_FILE	"../assets/maps/default.txt"
 
 #define DEFAULT_PALETTE_X	0
 #define DEFAULT_PALETTE_Y	0

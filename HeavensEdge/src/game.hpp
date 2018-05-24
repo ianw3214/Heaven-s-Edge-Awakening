@@ -4,6 +4,9 @@
 #include <queue>
 #include <fstream>
 
+#include <nlohmann\json.hpp>
+using json = nlohmann::json;
+
 #include "QcEngine.hpp"
 
 #include "entities\gameObject.hpp"

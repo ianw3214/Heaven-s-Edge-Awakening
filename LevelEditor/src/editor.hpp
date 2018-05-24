@@ -7,9 +7,9 @@
 #include <experimental/filesystem>
 
 #include <nlohmann\json.hpp>
+using json = nlohmann::json;
 
 namespace fs = std::experimental::filesystem::v1;
-using json = nlohmann::json;
 
 #include "util.hpp"
 
@@ -55,7 +55,6 @@ private:
 	int tile_size;
 	int start_x;
 	int start_y;
-	int num_entities;
 	std::vector<EntityEntry> entities;
 	std::string tilemap_source;
 	std::string background_source;
