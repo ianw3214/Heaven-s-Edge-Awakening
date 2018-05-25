@@ -18,6 +18,7 @@ using json = nlohmann::json;
 #define KEY_SPACE	(1 << 2)
 #define KEY_ATTACK_DOWN	(1 << 3)
 #define KEY_ATTACK_UP   (1 << 4)
+#define KEY_UP		(1 << 5)
 
 #define DEFAULT_MAP_FILE "../assets/maps/default.txt"
 
@@ -29,9 +30,6 @@ using json = nlohmann::json;
 #define ARROW_IMG	"../assets/arrow.png"
 #define PORTAL		"portal"
 #define PORTAL_IMG	"../assets/portal.png"
-
-#define DEBUG_X		(8 * 64)
-#define DEBUG_Y		(6 * 64)
 
 struct GameData {
 	// -------------------------------------------------------------------------------
@@ -48,6 +46,7 @@ struct GameData {
 	int map_height;
 	std::vector<int> tilemap;
 	std::vector<bool> collisionmap;
+	std::vector<Vec2> portals;
 
 	// -------------------------------------------------------------------------------
 	// GAME STATE VARIABLES
@@ -55,6 +54,7 @@ struct GameData {
 	int keyStates;
 	int cam_x;
 	int cam_y;
+	bool change_state;
 
 	// UTILITY FUNCTIONS (MAY MOVE LATER)
 	bool collidingWithTiles(const Math::Shape& collision, int range = 0, bool quad = false);
@@ -89,7 +89,6 @@ private:
 	// variables to keep track of map transitions and data
 	std::string current_map;
 	int start_index;
-	bool next_state;
 
 	// -------------------------------------------------------------------------------
 	// UTILITY FUNCTIONS

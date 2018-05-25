@@ -27,6 +27,7 @@ void Game::init() {
 	GameObject::setGameData(data);
 	data->cam_x = 0;
 	data->cam_y = 0;
+	data->change_state = false;
 	// initialize textures
 	tiles = nullptr;
 	QcEngine::loadTexture(ARROW, ARROW_IMG);
@@ -72,7 +73,7 @@ void Game::update() {
 	// -------------------------------------------------------------------------------
 	// DEBUG CODE
 	// -------------------------------------------------------------------------------
-	if (next_state) {
+	if (data->change_state) {
 		changeState(std::make_unique<Game>("../assets/maps/test.txt"));
 	}
 }
@@ -92,10 +93,10 @@ void Game::render() {
 	for (GameObject* obj : data->entities) {
 		obj->render();
 	}
-	// -------------------------------------------------------------------------------
-	// DEBUG CODE
-	// -------------------------------------------------------------------------------
-	QcEngine::getTexture(PORTAL)->render(DEBUG_X - data->cam_x, DEBUG_Y - data->cam_y);
+	// TODO: determine if portals need to be rendered or if they are invisible
+	for (const Vec2& v : data->portals) {
+		QcEngine::getTexture(PORTAL)->render(v.x * data->tile_size - data->cam_x, v.y * data->tile_size - data->cam_y);
+	}
 }
 
 void Game::handleKeyPresses() {
@@ -121,14 +122,8 @@ void Game::handleKeyPresses() {
 	if (keyUp(SDL_SCANCODE_Z)) {
 		data->keyStates |= KEY_ATTACK_UP;
 	}
-	// handle map transitions if needed
 	if (keyDown(SDL_SCANCODE_UP)) {
-		// -------------------------------------------------------------------------------
-		// DEBUG CODE
-		// -------------------------------------------------------------------------------
-		if (Math::isColliding(player->getCollision(), Math::Rectangle(DEBUG_X, DEBUG_Y, 64, 128))) {
-			next_state = true;
-		}
+		data->keyStates |= KEY_UP;
 	}
 }
 
@@ -197,6 +192,7 @@ void Game::clearMap() {
 	}
 	data->tilemap.clear();
 	data->collisionmap.clear();
+	data->portals.clear();
 }
 
 bool GameData::collidingWithTiles(const Math::Shape & collision, int range, bool quad) {
@@ -267,6 +263,10 @@ void Game::loadMap(const std::string & path, bool verbose) {
 				if (verbose) LOG("NO START FOUND, DEFAULTING TO 0");
 				start_x = 0;
 				start_y = 0;
+			}
+			for (const auto& v : map_data["portals"]) {
+				data->portals.push_back(Vec2(v["x"], v["y"]));
+				if (verbose) LOG("ADDED PORTAL AT: " << v["x"] << ", " << v["y"]);
 			}
 			for (const auto& entity : map_data["entities"]) {
 				if (entity["type"] == "enemy") {

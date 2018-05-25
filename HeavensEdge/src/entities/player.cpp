@@ -155,6 +155,14 @@ void Player::handleKeyStates(Uint32 delta) {
 		data->new_entities.push(new_arrow);
 		
 	}
+	// handle map transitions if needed here
+	if (data->keyStates & KEY_UP) {
+		for (const Vec2& v : data->portals) {
+			if (Math::isColliding(collision, Math::Rectangle(v.x * data->tile_size, v.y * data->tile_size, data->tile_size, data->tile_size))) {
+				data->change_state = true;
+			}
+		}
+	}
 }
 
 void Player::move(Direction dir, int distance) {

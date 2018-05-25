@@ -42,6 +42,8 @@
 #define PLAYER_IMG			"../assets/editor/player.png"
 #define ENEMY				"enemy"
 #define ENEMY_IMG			"../assets/editor/enemy.png"
+#define PORTAL				"portal"
+#define PORTAL_IMG			"../assets/editor/portal.png"
 
 // HUD SPRITE DEFINITIONS
 #define ICON_TILE			"edit_icon"
@@ -65,6 +67,10 @@
 #define ENE_ENTITY_ICON_IMG "../assets/editor/enemy_entity_icon.png"
 #define ENE_ENTITY_SEL		"ene_ent_sel"
 #define ENE_ENTITY_SEL_IMG	"../assets/editor/enemy_entity_icon_select.png"
+#define POR_ENTITY_ICON		"spa_ent"
+#define POR_ENTITY_ICON_IMG	"../assets/editor/portal_entity_icon.png"
+#define POR_ENTITY_SEL		"spa_ent_sel"
+#define POR_ENTITY_SEL_IMG	"../assets/editor/portal_entity_icon_select.png"
 
 // MISC SPRITE DEFINITIONS
 #define SAVEMAP				"savemap"
@@ -100,7 +106,8 @@ enum EditMode {
 
 enum EntityEditMode {
 	E_EDIT_PLAYER,
-	E_EDIT_ENEMY
+	E_EDIT_ENEMY,
+	E_EDIT_PORTAL
 };
 
 enum EntityType {

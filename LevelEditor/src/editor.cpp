@@ -42,6 +42,7 @@ void Editor::init() {
 	// load entity textures
 	QcEngine::loadTexture(PLAYER, PLAYER_IMG);
 	QcEngine::loadTexture(ENEMY, ENEMY_IMG);
+	QcEngine::loadTexture(PORTAL, PORTAL_IMG);
 	// load HUD textures
 	QcEngine::loadTexture(ICON_TILE, ICON_TILE_IMG);
 	QcEngine::loadTexture(SELECT_TILE, SELECT_TILE_IMG);
@@ -53,6 +54,8 @@ void Editor::init() {
 	QcEngine::loadTexture(PLA_ENTITY_SEL, PLA_ENTITY_SEL_IMG);
 	QcEngine::loadTexture(ENE_ENTITY_ICON, ENE_ENTITY_ICON_IMG);
 	QcEngine::loadTexture(ENE_ENTITY_SEL, ENE_ENTITY_SEL_IMG);
+	QcEngine::loadTexture(POR_ENTITY_ICON, POR_ENTITY_ICON_IMG);
+	QcEngine::loadTexture(POR_ENTITY_SEL, POR_ENTITY_SEL_IMG);
 	// load MISC textures
 	QcEngine::loadTexture(SAVEMAP, SAVEMAP_IMG);
 	QcEngine::loadTexture(SPAWN_BLOCK, SPAWN_BLOCK_IMG);
@@ -208,6 +211,7 @@ void Editor::handleRightMouseHeld() {
 void Editor::resetMap() {
 	tile_size = DEFAULT_TILE_SIZE;
 	player_spawns.clear();
+	portals.clear();
 	entities.clear();
 	tilemap_source = DEFAULT_TILEMAP;
 	background_source = DEFAULT_BACKGROUND;
@@ -225,8 +229,7 @@ void Editor::resetMap() {
 
 void Editor::loadMap(const std::string & path) {
 	// clear previous tile data before loading in new data
-	tilemap.clear();
-	collisionmap.clear();
+	resetMap();
 	// open the map file to read
 	std::fstream map_file;
 	map_file.open(path, std::fstream::in);
@@ -238,6 +241,9 @@ void Editor::loadMap(const std::string & path) {
 			tile_size = map_data["tile size"];
 			for (const auto& v : map_data["start"]) {
 				player_spawns.push_back(Vec2(v["x"], v["y"]));
+			}
+			for (const auto& v : map_data["portals"]) {
+				portals.push_back(Vec2(v["x"], v["y"]));
 			}
 			for (const auto& entity : map_data["entities"]) {
 				if (entity["type"] == "enemy") {
@@ -254,6 +260,7 @@ void Editor::loadMap(const std::string & path) {
 		} catch(const std::exception& e) {
 			std::cerr << e.what();
 			map_file.close();
+			// reset the map to clear out any data we might have already loaded
 			resetMap();
 			saveMap(path);
 		}
@@ -273,11 +280,19 @@ void Editor::saveMap(const std::string & path) {
 
 	json map_data;
 	map_data["tile size"] = tile_size;
+	// input the player spawns into an array one by one
 	map_data["start"] = json::array();
 	for (const Vec2& v : player_spawns) {
 		json vec = { {"x", v.x}, {"y", v.y} };
 		map_data["start"].push_back(vec);
 	}
+	// input the portals into an array one by one
+	map_data["portals"] = json::array();
+	for (const Vec2& v : portals) {
+		json vec = { {"x", v.x}, {"y", v.y } };
+		map_data["portals"].push_back(vec);
+	}
+	// input the entities into an array one by one
 	map_data["entities"] = json::array();
 	for (const EntityEntry& e : entities) {
 		json entity = { {"type", "enemy"}, {"x", e.x}, {"y", e.y} };

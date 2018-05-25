@@ -57,6 +57,7 @@ private:
 	// -------------------------------------------------------------------------------
 	int tile_size;
 	std::vector<Vec2> player_spawns;
+	std::vector<Vec2> portals;
 	std::vector<EntityEntry> entities;
 	std::string tilemap_source;
 	std::string background_source;

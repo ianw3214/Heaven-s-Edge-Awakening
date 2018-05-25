@@ -33,7 +33,6 @@ void Editor::renderEditor() {
 	}
 	if (edit_mode == EDIT_ENTITIES) {
 		// render the player
-		// QcEngine::getTexture(PLAYER)->render(start_x * tile_size - camera_x, start_y * tile_size - camera_y);
 		for (const Vec2& v : player_spawns) {
 			QcEngine::getTexture(PLAYER)->render(v.x * tile_size - camera_x, v.y * tile_size - camera_y);
 			// TODO: render a text to show the player spawn number as well
@@ -44,15 +43,23 @@ void Editor::renderEditor() {
 				QcEngine::getTexture(ENEMY)->render(e.x * tile_size - camera_x, e.y * tile_size - camera_y);
 			}
 		}
+		// render the portals
+		for (const Vec2& v : portals) {
+			QcEngine::getTexture(PORTAL)->render(v.x * tile_size - camera_x, v.y * tile_size - camera_y);
+		}
 		// render the entity options
 		if (show_HUD) {
 			QcEngine::getTexture(PLA_ENTITY_ICON)->render(0, 0);
 			QcEngine::getTexture(ENE_ENTITY_ICON)->render(0, 64);
+			QcEngine::getTexture(POR_ENTITY_ICON)->render(0, 128);
 			if (e_edit_mode == E_EDIT_PLAYER) {
 				QcEngine::getTexture(PLA_ENTITY_SEL)->render(0, 0);
 			}
 			if (e_edit_mode == E_EDIT_ENEMY) {
 				QcEngine::getTexture(ENE_ENTITY_SEL)->render(0, 64);
+			}
+			if (e_edit_mode == E_EDIT_PORTAL) {
+				QcEngine::getTexture(POR_ENTITY_SEL)->render(0, 128);
 			}
 		}
 	}
@@ -83,17 +90,19 @@ void Editor::handleKeyPressEditor() {
 		pan_started = false;
 	}
 	// QWERTY for common controls
-	if (keyDown(SDL_SCANCODE_Q)) {
-		state = STATE_EDITOR;
-		edit_mode = EDIT_TILE;
-	}
-	if (keyDown(SDL_SCANCODE_W)) {
-		state = STATE_EDITOR;
-		edit_mode = EDIT_COLLISION;
-	}
-	if (keyDown(SDL_SCANCODE_E)) {
-		state = STATE_EDITOR;
-		edit_mode = EDIT_ENTITIES;
+	{
+		if (keyDown(SDL_SCANCODE_Q)) {
+			state = STATE_EDITOR;
+			edit_mode = EDIT_TILE;
+		}
+		if (keyDown(SDL_SCANCODE_W)) {
+			state = STATE_EDITOR;
+			edit_mode = EDIT_COLLISION;
+		}
+		if (keyDown(SDL_SCANCODE_E)) {
+			state = STATE_EDITOR;
+			edit_mode = EDIT_ENTITIES;
+		}
 	}
 	if (keyDown(SDL_SCANCODE_S)) {
 		// TODO: move this somewhere else
@@ -183,6 +192,9 @@ void Editor::handleKeyPressEditor() {
 		if (keyPressed(SDL_SCANCODE_2)) {
 			e_edit_mode = E_EDIT_ENEMY;
 		}
+		if (keyPressed(SDL_SCANCODE_3)) {
+			e_edit_mode = E_EDIT_PORTAL;
+		}
 	}
 }
 
@@ -208,6 +220,8 @@ void Editor::handleLeftMouseClickEditor() {
 				e_edit_mode = E_EDIT_PLAYER;
 			} else if (Math::isColliding(m_pos, Math::Rectangle(0, 64, 128, 64))) {
 				e_edit_mode = E_EDIT_ENEMY;
+			} else if (Math::isColliding(m_pos, Math::Rectangle(0, 128, 128, 64))) {
+				e_edit_mode = E_EDIT_PORTAL;
 			}
 			// add an entity if we are not clicking buttons
 			else if (e_edit_mode == E_EDIT_PLAYER) {
@@ -227,6 +241,17 @@ void Editor::handleLeftMouseClickEditor() {
 			}
 			else if (e_edit_mode == E_EDIT_ENEMY) {
 				entities.push_back({ E_ENEMY, cur_tile_x, cur_tile_y });
+			}
+			else if (e_edit_mode == E_EDIT_PORTAL) {
+				// first check to make sure a portal is not at the current position already
+				bool found = false;
+				for (unsigned int i = 0; i < portals.size(); ++i) {
+					if (cur_tile_x == portals[i].x && cur_tile_y == portals[i].y) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) portals.push_back(Vec2(cur_tile_x, cur_tile_y));
 			}
 		}
 	}
@@ -295,6 +320,8 @@ void Editor::handleLeftMouseHeldEditor() {
 				e_edit_mode = E_EDIT_PLAYER;
 			} else if (Math::isColliding(m_pos, Math::Rectangle(0, 64, 128, 64))) {
 				e_edit_mode = E_EDIT_ENEMY;
+			} else if (Math::isColliding(m_pos, Math::Rectangle(0, 128, 128, 64))) {
+				e_edit_mode = E_EDIT_PORTAL;
 			}
 			// the user is clicking to adjust the position of an entitiy
 			else if (e_edit_mode == E_EDIT_PLAYER) {
@@ -327,6 +354,12 @@ void Editor::handleRightMouseHeldEditor() {
 			for (unsigned int i = 0; i < player_spawns.size(); ++i) {
 				if (cur_tile_x == player_spawns[i].x && cur_tile_y == player_spawns[i].y) {
 					player_spawns.erase(player_spawns.begin() + i);
+					break;
+				}
+			}
+			for (unsigned int i = 0; i < portals.size(); ++i) {
+				if (cur_tile_x == portals[i].x && cur_tile_y == portals[i].y) {
+					portals.erase(portals.begin() + i);
 					break;
 				}
 			}
