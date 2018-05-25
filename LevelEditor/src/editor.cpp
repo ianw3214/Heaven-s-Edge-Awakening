@@ -1,5 +1,8 @@
 #include "editor.hpp"
 
+// static variable declaration
+std::vector<Texture*> Editor::numbers;
+
 Editor::Editor() {
 
 }
@@ -21,11 +24,12 @@ void Editor::init() {
 	show_HUD = true;
 	// setup a font
 	createFont("default_16", DEFAULT_FONT, 16);
-	// TODO: load tilemap from specified file
+	createFont("default_48", DEFAULT_FONT, 48);
 	// initialize tilemap textures
+	// TODO: load tilemap from specified file
 	tiles = static_cast<TileMap*>(QcEngine::loadTexture(TILEMAP, DEFAULT_TILEMAP, T_TILEMAP));
 	tiles->generateTiles(DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE);
-	// load commonly used editor textures
+	// load basic used editor textures
 	QcEngine::loadTexture(TILE_SELECT, TILE_SELECT_IMG);
 	QcEngine::loadTexture(COLLISION, COLLISION_IMG);
 	QcEngine::loadTexture(WHITE_BAR, WHITE_BAR_IMG);
@@ -51,6 +55,8 @@ void Editor::init() {
 	QcEngine::loadTexture(ENE_ENTITY_SEL, ENE_ENTITY_SEL_IMG);
 	// load MISC textures
 	QcEngine::loadTexture(SAVEMAP, SAVEMAP_IMG);
+	QcEngine::loadTexture(SPAWN_BLOCK, SPAWN_BLOCK_IMG);
+	QcEngine::loadTexture(SPAWN_SELECT, SPAWN_SELECT_IMG);
 	// initialize a default map
 	loadMap();
 	// initialize file things
@@ -128,41 +134,22 @@ void Editor::render() {
 	if (state == STATE_EDITOR) {
 		renderEditor();
 	}
-	if (state == STATE_SAVEMAP) {
-		int x = (QcEngine::getCVARint("WINDOW WIDTH") - QcEngine::getTexture(SAVEMAP)->getWidth()) / 2;
-		int y = (QcEngine::getCVARint("WINDOW HEIGHT") - QcEngine::getTexture(SAVEMAP)->getHeight()) / 2;
-		QcEngine::getTexture(SAVEMAP)->render(x, y);
-		// render text if there is any
-		const std::string& ref = managerRef->getTextInput();
-		if (ref.size() > 0) {
-			SDL_Texture * text_texture = getTextTexture(ref, "default_16", { 0, 0, 0 });
-			Texture * tex = new Texture(text_texture);
-			tex->render(530, 350);
-		}
+	if (state == STATE_MENU) {
+		renderMenu();
 	}
 }
 
 void Editor::handleKeyPresses() {
 	// use the escape key to return a state
 	if (keyDown(SDL_SCANCODE_ESCAPE)) {
-		if (state == STATE_SAVEMAP) {
+		if (state == STATE_MENU) {
 			state = STATE_EDITOR;
 		} else {
 			exit();
 		}
 	}
-	if (keyDown(SDL_SCANCODE_RETURN)) {
-		if (state == STATE_SAVEMAP) {
-			const std::string& ref = managerRef->getTextInput();
-			if (ref.size() > 0) {
-				std::string dest = DEFAULT_MAP_FOLDER + ref + ".txt";
-				saveMap(dest);
-			} else {
-				saveMap(DEFAULT_MAP_FILE);
-			}
-			state = STATE_EDITOR;
-			managerRef->stopTextInput();
-		}
+	if (state == STATE_MENU) {
+		handleKeyPressMenu();
 	}
 	/*
 	// temporary key to put file loading
@@ -201,13 +188,8 @@ void Editor::handleLeftMouseClick() {
 		}
 	}
 	// if the user clicks the box, focus in to handle text input
-	if (state == STATE_SAVEMAP) {
-		Vec2 m_pos = Vec2(getMouseX(), getMouseY());
-		int x = (QcEngine::getCVARint("WINDOW WIDTH") - QcEngine::getTexture(SAVEMAP)->getWidth()) / 2;
-		int y = (QcEngine::getCVARint("WINDOW HEIGHT") - QcEngine::getTexture(SAVEMAP)->getHeight()) / 2;
-		if (Math::isColliding(m_pos, Math::Rectangle(x, y, 256, 128))) {
-			managerRef->startTextInput();
-		}
+	if (state == STATE_MENU) {
+		handleLeftMouseClickMenu();
 	}
 }
 
@@ -225,8 +207,7 @@ void Editor::handleRightMouseHeld() {
 
 void Editor::resetMap() {
 	tile_size = DEFAULT_TILE_SIZE;
-	start_x = 0;
-	start_y = 0;
+	player_spawns.clear();
 	entities.clear();
 	tilemap_source = DEFAULT_TILEMAP;
 	background_source = DEFAULT_BACKGROUND;
@@ -255,8 +236,9 @@ void Editor::loadMap(const std::string & path) {
 			json map_data;
 			map_file >> map_data;
 			tile_size = map_data["tile size"];
-			start_x = map_data["start x"];
-			start_y = map_data["start y"];
+			for (const auto& v : map_data["start"]) {
+				player_spawns.push_back(Vec2(v["x"], v["y"]));
+			}
 			for (const auto& entity : map_data["entities"]) {
 				if (entity["type"] == "enemy") {
 					entities.push_back({ E_ENEMY, entity["x"], entity["y"] });
@@ -291,8 +273,11 @@ void Editor::saveMap(const std::string & path) {
 
 	json map_data;
 	map_data["tile size"] = tile_size;
-	map_data["start x"] = start_x;
-	map_data["start y"] = start_y;
+	map_data["start"] = json::array();
+	for (const Vec2& v : player_spawns) {
+		json vec = { {"x", v.x}, {"y", v.y} };
+		map_data["start"].push_back(vec);
+	}
 	map_data["entities"] = json::array();
 	for (const EntityEntry& e : entities) {
 		json entity = { {"type", "enemy"}, {"x", e.x}, {"y", e.y} };
@@ -309,4 +294,14 @@ void Editor::saveMap(const std::string & path) {
 	std::cout << map_data.dump(4) << std::endl;
 
 	map_file.close();
+}
+
+// utility function to get a texture number
+// only stores size 48 black font numbers
+Texture * Editor::getNumberTexture(unsigned int num) {
+	while (numbers.size() <= num) {
+		SDL_Texture * num_tex = getTextTexture(std::to_string(numbers.size()), "default_48", {0, 0, 0});
+		numbers.push_back(new Texture(num_tex));
+	}
+	return numbers[num];
 }

@@ -33,7 +33,11 @@ void Editor::renderEditor() {
 	}
 	if (edit_mode == EDIT_ENTITIES) {
 		// render the player
-		QcEngine::getTexture(PLAYER)->render(start_x * tile_size - camera_x, start_y * tile_size - camera_y);
+		// QcEngine::getTexture(PLAYER)->render(start_x * tile_size - camera_x, start_y * tile_size - camera_y);
+		for (const Vec2& v : player_spawns) {
+			QcEngine::getTexture(PLAYER)->render(v.x * tile_size - camera_x, v.y * tile_size - camera_y);
+			// TODO: render a text to show the player spawn number as well
+		}
 		// render the enemies
 		for (const EntityEntry& e : entities) {
 			if (e.type == E_ENEMY) {
@@ -93,7 +97,8 @@ void Editor::handleKeyPressEditor() {
 	}
 	if (keyDown(SDL_SCANCODE_S)) {
 		// TODO: move this somewhere else
-		state = STATE_SAVEMAP;
+		state = STATE_MENU;
+		menu_state = MENU_SAVEMAP;
 	}
 	// RESET THE MAP
 	if (keyDown(SDL_SCANCODE_DELETE)) {
@@ -203,11 +208,25 @@ void Editor::handleLeftMouseClickEditor() {
 				e_edit_mode = E_EDIT_PLAYER;
 			} else if (Math::isColliding(m_pos, Math::Rectangle(0, 64, 128, 64))) {
 				e_edit_mode = E_EDIT_ENEMY;
-			} 
-			// add an enemy if we are not clicking buttons
+			}
+			// add an entity if we are not clicking buttons
+			else if (e_edit_mode == E_EDIT_PLAYER) {
+				// first check to see if a player is at the current position, and if so bring up the adjustment menu
+				bool clicking = false;
+				for (unsigned int i = 0; i < player_spawns.size(); ++i) {
+					// a player is found here
+					if (cur_tile_x == player_spawns[i].x && cur_tile_y == player_spawns[i].y) {
+						current_spawn_index = i;
+						state = STATE_MENU;
+						menu_state = MENU_EDIT_SPAWN;
+						clicking = true;
+						break;
+					}
+				}
+				if (!clicking) player_spawns.push_back(Vec2(cur_tile_x, cur_tile_y));
+			}
 			else if (e_edit_mode == E_EDIT_ENEMY) {
 				entities.push_back({ E_ENEMY, cur_tile_x, cur_tile_y });
-				num_entities++;
 			}
 		}
 	}
@@ -279,8 +298,7 @@ void Editor::handleLeftMouseHeldEditor() {
 			}
 			// the user is clicking to adjust the position of an entitiy
 			else if (e_edit_mode == E_EDIT_PLAYER) {
-				start_x = cur_tile_x;
-				start_y = cur_tile_y;
+				// FIND A WAY TO HANDLE THIS WELL
 			}
 		}
 	}
@@ -300,10 +318,15 @@ void Editor::handleRightMouseHeldEditor() {
 		}
 		// remove an entity from the map
 		if (edit_mode == EDIT_ENTITIES) {
-			for (int i = 0; i < entities.size(); ++i) {
+			for (unsigned int i = 0; i < entities.size(); ++i) {
 				if (cur_tile_x == entities[i].x && cur_tile_y == entities[i].y) {
 					entities.erase(entities.begin() + i);
-					num_entities--;
+					break;
+				}
+			}
+			for (unsigned int i = 0; i < player_spawns.size(); ++i) {
+				if (cur_tile_x == player_spawns[i].x && cur_tile_y == player_spawns[i].y) {
+					player_spawns.erase(player_spawns.begin() + i);
 					break;
 				}
 			}

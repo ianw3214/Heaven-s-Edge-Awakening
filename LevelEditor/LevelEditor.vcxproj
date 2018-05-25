@@ -123,6 +123,7 @@
     <ClCompile Include="src\editor.cpp" />
     <ClCompile Include="src\editor_state.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\menu_state.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\editor.hpp" />

@@ -2,6 +2,7 @@
 
 #include "QcEngine.hpp"
 
+#include <string>
 #include <vector>
 #include <fstream>
 #include <experimental/filesystem>
@@ -43,18 +44,19 @@ private:
 	// -------------------------------------------------------------------------------
 	ProgramState state;
 	EditorState editor_state;
+	MenuState menu_state;
 	EditMode edit_mode;
 	EntityEditMode e_edit_mode;
 	int current_tile;
 	bool pan_started;
 	bool show_HUD;
+	int current_spawn_index;
 
 	// -------------------------------------------------------------------------------
 	// MAP SETTINGS
 	// -------------------------------------------------------------------------------
 	int tile_size;
-	int start_x;
-	int start_y;
+	std::vector<Vec2> player_spawns;
 	std::vector<EntityEntry> entities;
 	std::string tilemap_source;
 	std::string background_source;
@@ -82,6 +84,13 @@ private:
 	void handleRightMouseHeldEditor();
 
 	// -------------------------------------------------------------------------------
+	// MENU HELPER FUNCTIONS
+	// -------------------------------------------------------------------------------
+	void renderMenu();
+	void handleKeyPressMenu();
+	void handleLeftMouseClickMenu();
+
+	// -------------------------------------------------------------------------------
 	// MISC. UTILITY FUNCTIONS
 	// -------------------------------------------------------------------------------
 	inline int tileIndex(int x, int y) const {
@@ -93,7 +102,12 @@ private:
 
 	// the tilemap is just a pointer, no ownership
 	TileMap * tiles;
-
+	
+	// TODO: implement a more robust file selection system
 	std::vector<FileMenuItem> files;
+
+	// static texture storage
+	static std::vector<Texture*> numbers;
+	Texture * getNumberTexture(unsigned int num);
 
 };

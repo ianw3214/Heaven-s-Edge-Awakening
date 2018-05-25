@@ -4,10 +4,17 @@
 
 Game::Game() {
 	current_map = DEFAULT_MAP_FILE;
+	start_index = 0;
 }
 
 Game::Game(const std::string& path) {
 	current_map = path;
+	start_index = 0;
+}
+
+Game::Game(const std::string& path, int start_index) {
+	this->current_map = path;
+	this->start_index = start_index;
 }
 
 Game::~Game() {
@@ -230,8 +237,8 @@ bool GameData::collidingWithTiles(const Math::Shape & collision, int range, bool
 void Game::loadMap(const std::string & path, bool verbose) {
 	if (verbose) LOG("LOADING MAP: " << path);
 	// things to be loaded
-	int start_x;
-	int start_y;
+	int start_x = -1;
+	int start_y = -1;
 	std::string tilemap_source;
 	std::string background_source;
 	// clear previous map data before loading in new data
@@ -246,9 +253,21 @@ void Game::loadMap(const std::string & path, bool verbose) {
 			map_file >> map_data;
 			data->tile_size = map_data["tile size"];
 			if (verbose) LOG("TILE SIZE: " << data->tile_size);
-			start_x = map_data["start x"];
-			start_y = map_data["start y"];
-			if (verbose) LOG("START POS: " << start_x << ", " << start_y);
+			int i = 0;
+			for (const auto& vec : map_data["start"]) {
+				if (i == start_index) {
+					start_x = vec["x"];
+					start_y = vec["y"];
+					if (verbose) LOG("START POS: " << start_x << ", " << start_y);
+					break;
+				}
+			}
+			// check to make sure we assigned a start, or else default to 0
+			if (start_x < 0 || start_y < 0) {
+				if (verbose) LOG("NO START FOUND, DEFAULTING TO 0");
+				start_x = 0;
+				start_y = 0;
+			}
 			for (const auto& entity : map_data["entities"]) {
 				if (entity["type"] == "enemy") {
 					addEntity(new Enemy(entity["x"] * data->tile_size, entity["y"] * data->tile_size));

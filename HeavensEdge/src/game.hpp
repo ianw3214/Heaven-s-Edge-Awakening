@@ -66,6 +66,7 @@ public:
 
 	Game();
 	Game(const std::string& path);
+	Game(const std::string& path, int start_index);
 	~Game();
 
 	void init();
@@ -87,6 +88,7 @@ private:
 
 	// variables to keep track of map transitions and data
 	std::string current_map;
+	int start_index;
 	bool next_state;
 
 	// -------------------------------------------------------------------------------

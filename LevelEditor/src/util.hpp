@@ -69,18 +69,27 @@
 // MISC SPRITE DEFINITIONS
 #define SAVEMAP				"savemap"
 #define SAVEMAP_IMG			"../assets/editor/savemap_bg.png"
+#define SPAWN_BLOCK			"spawn_block"
+#define SPAWN_BLOCK_IMG		"../assets/editor/spawn_block.png"
+#define SPAWN_SELECT		"spawn_select"
+#define SPAWN_SELECT_IMG	"../assets/editor/spawn_block_select.png"
 
 enum ProgramState {
 	STATE_EDITOR,
 	STATE_FILE,
 	STATE_SETTINGS,
-	STATE_SAVEMAP
+	STATE_MENU
 };
 
 enum EditorState {
 	EDITOR_EDIT,
 	EDITOR_PANNING,
 	EDITOR_PICK
+};
+
+enum MenuState {
+	MENU_SAVEMAP,
+	MENU_EDIT_SPAWN
 };
 
 enum EditMode {
