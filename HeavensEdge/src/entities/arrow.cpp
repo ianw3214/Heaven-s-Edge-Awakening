@@ -14,10 +14,38 @@ Arrow::~Arrow() {
 void Arrow::render() {
 	QcEngine::getTexture(ARROW_TEXTURE_ID)->setAngle(angle);
 	QcEngine::getTexture(ARROW_TEXTURE_ID)->render(x - data->cam_x, y - data->cam_y);
+	// render the particles (ASSUME particle frames are in order so we always remove from the end)
+	Particle * temp = head;
+	Particle * prev = nullptr;
+	while (temp != nullptr) {
+		if (temp->frame > 2) {
+			if (prev) {
+				prev->next = nullptr;
+				delete temp;
+			}
+			else {
+				head = nullptr;
+				delete temp;
+			}
+			break;
+		}
+		AnimatedTexture * t = static_cast<AnimatedTexture*>(QcEngine::getTexture(ARROW_P));
+		t->render(temp->x - data->cam_x, temp->y - data->cam_y, temp->frame);
+		temp->frame++;
+		temp = temp->next;
+	}
 }
 
 void Arrow::update(Uint32 delta) {
 	if (!stopped) {
+		// add a new particle to the arrow
+		Particle * part = new Particle();
+		// account for offset of particle sprite and height of arrow
+		part->x = x - 8;
+		part->y = y - 8 - (right ? -8 : 8);
+		part->frame = 0;
+		part->next = head;
+		head = part;
 		// check if the arrow is colliding with anything before moving it
 		if (data->collidingWithTiles(collision, 2, true)) {
 			timer.reset(true);

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <queue>
+
 #include "QcEngine.hpp"
 #include "gameObject.hpp"
 #include "../util.hpp"
@@ -8,6 +10,13 @@
 #define ARROW_EXPIRE 5000
 
 #define ARROW_TEXTURE_ID "arrow"
+
+struct Particle {
+	int x;
+	int y;
+	int frame;
+	Particle * next;
+};
 
 class Arrow : public GameObject {
 
@@ -31,5 +40,8 @@ private:
 	bool stopped;
 	// timer to keep track of when the arrow should dissapear after stopping
 	Timer timer;
+
+	// linked list of arrow particles
+	Particle * head;
 
 };

@@ -29,6 +29,8 @@ using json = nlohmann::json;
 
 #define ARROW		"arrow"
 #define ARROW_IMG	"../assets/arrow.png"
+#define ARROW_P		"arrow_particle"
+#define ARROW_P_IMG	"../assets/arrow_particle.png"
 #define PORTAL		"portal"
 #define PORTAL_IMG	"../assets/portal.png"
 

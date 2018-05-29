@@ -31,6 +31,9 @@ void Game::init() {
 	// initialize textures
 	tiles = nullptr;
 	QcEngine::loadTexture(ARROW, ARROW_IMG);
+	AnimatedTexture * arrow_particle_texture = static_cast<AnimatedTexture*>(QcEngine::loadTexture(ARROW_P, ARROW_P_IMG, T_ANIMATED));
+	arrow_particle_texture->generateAtlas(16, 16);
+	arrow_particle_texture->addAnimationState(0, 2);
 	QcEngine::loadTexture(PORTAL, PORTAL_IMG);
 	AnimatedTexture * t = static_cast<AnimatedTexture*>(QcEngine::loadTexture("enemy", "../assets/enemy.png", T_ANIMATED));
 	t->generateAtlas(64, 128);
