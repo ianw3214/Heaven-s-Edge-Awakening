@@ -74,7 +74,7 @@ void Game::update() {
 	// DEBUG CODE
 	// -------------------------------------------------------------------------------
 	if (data->change_state) {
-		changeState(std::make_unique<Game>("../assets/maps/test.txt"));
+		changeState(std::make_unique<Game>(MAP_FOLDER + data->next_map, data->next_index));
 	}
 }
 
@@ -94,7 +94,7 @@ void Game::render() {
 		obj->render();
 	}
 	// TODO: determine if portals need to be rendered or if they are invisible
-	for (const Vec2& v : data->portals) {
+	for (const PortalEntry& v : data->portals) {
 		QcEngine::getTexture(PORTAL)->render(v.x * data->tile_size - data->cam_x, v.y * data->tile_size - data->cam_y);
 	}
 }
@@ -231,7 +231,7 @@ bool GameData::collidingWithTiles(const Math::Shape & collision, int range, bool
 }
 
 void Game::loadMap(const std::string & path, bool verbose) {
-	if (verbose) LOG("LOADING MAP: " << path);
+	if (verbose) LOG("+= LOADING MAP: " << path << " =+");
 	// things to be loaded
 	int start_x = -1;
 	int start_y = -1;
@@ -265,8 +265,8 @@ void Game::loadMap(const std::string & path, bool verbose) {
 				start_y = 0;
 			}
 			for (const auto& v : map_data["portals"]) {
-				data->portals.push_back(Vec2(v["x"], v["y"]));
-				if (verbose) LOG("ADDED PORTAL AT: " << v["x"] << ", " << v["y"]);
+				data->portals.push_back({v["x"], v["y"], v["file"], v["index"]});
+				if (verbose) LOG("ADDED PORTAL AT: " << v["x"] << ", " << v["y"] << " TO FILE: " << v["file"] << " AT INDEX " << v["index"]);
 			}
 			for (const auto& entity : map_data["entities"]) {
 				if (entity["type"] == "enemy") {
@@ -296,8 +296,11 @@ void Game::loadMap(const std::string & path, bool verbose) {
 	// assume the file loaded successfully for now
 	player = new Player(start_x * data->tile_size, start_y * data->tile_size);	// starting position in tile coords
 	addEntity(player);
+	LOG("PLAYER ADDED AT: " << player->getX() << ", " << player->getY());
 	tiles = static_cast<TileMap*>(QcEngine::loadTexture(TILEMAP, tilemap_source, T_TILEMAP));
 	tiles->generateTiles(data->tile_size, data->tile_size);
 	// TOOD: figure out better way to store backgrounds
 	QcEngine::loadTexture("bg", background_source);
+
+	LOG("+= FINISHED LOADING MAP =+");
 }

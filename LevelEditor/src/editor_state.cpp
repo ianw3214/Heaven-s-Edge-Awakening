@@ -44,7 +44,7 @@ void Editor::renderEditor() {
 			}
 		}
 		// render the portals
-		for (const Vec2& v : portals) {
+		for (const PortalEntry& v : portals) {
 			QcEngine::getTexture(PORTAL)->render(v.x * tile_size - camera_x, v.y * tile_size - camera_y);
 		}
 		// render the entity options
@@ -248,10 +248,13 @@ void Editor::handleLeftMouseClickEditor() {
 				for (unsigned int i = 0; i < portals.size(); ++i) {
 					if (cur_tile_x == portals[i].x && cur_tile_y == portals[i].y) {
 						found = true;
+						state = STATE_MENU;
+						menu_state = MENU_EDIT_PORTAL;
+						current_portal_index = i;
 						break;
 					}
 				}
-				if (!found) portals.push_back(Vec2(cur_tile_x, cur_tile_y));
+				if (!found) portals.push_back(PortalEntry{ cur_tile_x, cur_tile_y, DEFAULT_MAP_NAME, 0 });
 			}
 		}
 	}

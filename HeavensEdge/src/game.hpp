@@ -20,7 +20,8 @@ using json = nlohmann::json;
 #define KEY_ATTACK_UP   (1 << 4)
 #define KEY_UP		(1 << 5)
 
-#define DEFAULT_MAP_FILE "../assets/maps/default.txt"
+#define MAP_FOLDER			"../assets/maps/"
+#define DEFAULT_MAP_FILE	"../assets/maps/default.txt"
 
 #define CAMERA_SPEED 700
 
@@ -31,6 +32,19 @@ using json = nlohmann::json;
 #define PORTAL		"portal"
 #define PORTAL_IMG	"../assets/portal.png"
 
+// -------------------------------------------------------------------------------
+// UTILITY STRUCT TO STORE PORTAL DATA LOADED FROM MAPS
+// -------------------------------------------------------------------------------
+struct PortalEntry {
+	int x;
+	int y;
+	std::string file;
+	int num;
+};
+
+// -------------------------------------------------------------------------------
+// GLOBAL STRUCT CONTAINING MAIN GAME DATA
+// -------------------------------------------------------------------------------
 struct GameData {
 	// -------------------------------------------------------------------------------
 	// GAME ENTITIES
@@ -46,7 +60,7 @@ struct GameData {
 	int map_height;
 	std::vector<int> tilemap;
 	std::vector<bool> collisionmap;
-	std::vector<Vec2> portals;
+	std::vector<PortalEntry> portals;
 
 	// -------------------------------------------------------------------------------
 	// GAME STATE VARIABLES
@@ -55,6 +69,8 @@ struct GameData {
 	int cam_x;
 	int cam_y;
 	bool change_state;
+	std::string next_map;
+	int next_index;
 
 	// UTILITY FUNCTIONS (MAY MOVE LATER)
 	bool collidingWithTiles(const Math::Shape& collision, int range = 0, bool quad = false);

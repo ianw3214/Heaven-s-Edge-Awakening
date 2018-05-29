@@ -12,6 +12,7 @@
 #define DEFAULT_BACKGROUND	"../assets/parallax_test.png"
 
 #define DEFAULT_MAP_FOLDER	"../assets/maps/"
+#define DEFAULT_MAP_NAME	"default.txt"
 #define DEFAULT_MAP_FILE	"../assets/maps/default.txt"
 
 #define DEFAULT_PALETTE_X	0
@@ -79,6 +80,8 @@
 #define SPAWN_BLOCK_IMG		"../assets/editor/spawn_block.png"
 #define SPAWN_SELECT		"spawn_select"
 #define SPAWN_SELECT_IMG	"../assets/editor/spawn_block_select.png"
+#define BLANK_MENU			"blank_menu"
+#define BLANK_MENU_IMG		"../assets/editor/blank_menu.png"
 
 enum ProgramState {
 	STATE_EDITOR,
@@ -95,7 +98,8 @@ enum EditorState {
 
 enum MenuState {
 	MENU_SAVEMAP,
-	MENU_EDIT_SPAWN
+	MENU_EDIT_SPAWN,
+	MENU_EDIT_PORTAL
 };
 
 enum EditMode {
@@ -118,6 +122,13 @@ struct EntityEntry {
 	EntityType type;
 	int x;
 	int y;
+};
+
+struct PortalEntry {
+	int x;
+	int y;
+	std::string file;
+	int num;
 };
 
 // struct representing each file item in the menu

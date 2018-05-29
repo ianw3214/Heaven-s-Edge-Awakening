@@ -157,9 +157,11 @@ void Player::handleKeyStates(Uint32 delta) {
 	}
 	// handle map transitions if needed here
 	if (data->keyStates & KEY_UP) {
-		for (const Vec2& v : data->portals) {
+		for (const PortalEntry& v : data->portals) {
 			if (Math::isColliding(collision, Math::Rectangle(v.x * data->tile_size, v.y * data->tile_size, data->tile_size, data->tile_size))) {
 				data->change_state = true;
+				data->next_map = v.file;
+				data->next_index = v.num;
 			}
 		}
 	}

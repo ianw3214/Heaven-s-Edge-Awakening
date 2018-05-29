@@ -15,6 +15,7 @@ void Editor::renderMenu() {
 			SDL_Texture * text_texture = getTextTexture(ref, "default_16", { 0, 0, 0 });
 			Texture * tex = new Texture(text_texture);
 			tex->render(530, 350);
+			delete tex;
 		}
 	}
 	if (menu_state == MENU_EDIT_SPAWN) {
@@ -28,6 +29,19 @@ void Editor::renderMenu() {
 			// render the tile index number
 			getNumberTexture(i)->render(255, 110 + i * 80);
 		}
+	}
+	if (menu_state == MENU_EDIT_PORTAL) {
+		QcEngine::getTexture(BLANK_MENU)->render((1280 - 256) / 2, (720 - 128) / 2);
+		// render the file name
+		SDL_Texture * file_text = getTextTexture(portals[current_portal_index].file, "default_16", {0, 0, 0});
+		Texture * file_tex = new Texture(file_text);
+		file_tex->render((1280 - 240) / 2, (720 - 100) / 2);
+		delete file_tex;
+		// render the portal index
+		SDL_Texture * num_text = getTextTexture(std::to_string(portals[current_portal_index].num), "default_16", { 0, 0, 0 });
+		Texture * num_tex = new Texture(num_text);
+		num_tex->render((1280 - 10) / 2, (720 - 60) / 2);
+		delete num_tex;
 	}
 }
 
@@ -45,6 +59,9 @@ void Editor::handleKeyPressMenu() {
 			managerRef->stopTextInput();
 		}
 		if (menu_state == MENU_EDIT_SPAWN) {
+			state = STATE_EDITOR;
+		}
+		if (menu_state == MENU_EDIT_PORTAL) {
 			state = STATE_EDITOR;
 		}
 	}

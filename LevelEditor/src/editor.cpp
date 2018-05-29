@@ -60,6 +60,7 @@ void Editor::init() {
 	QcEngine::loadTexture(SAVEMAP, SAVEMAP_IMG);
 	QcEngine::loadTexture(SPAWN_BLOCK, SPAWN_BLOCK_IMG);
 	QcEngine::loadTexture(SPAWN_SELECT, SPAWN_SELECT_IMG);
+	QcEngine::loadTexture(BLANK_MENU, BLANK_MENU_IMG);
 	// initialize a default map
 	loadMap();
 	// initialize file things
@@ -243,7 +244,14 @@ void Editor::loadMap(const std::string & path) {
 				player_spawns.push_back(Vec2(v["x"], v["y"]));
 			}
 			for (const auto& v : map_data["portals"]) {
-				portals.push_back(Vec2(v["x"], v["y"]));
+				PortalEntry temp;
+				temp.x = v["x"];
+				temp.y = v["y"];
+				if (v.find("file") != v.end()) temp.file = v["file"].get<std::string>();
+				else temp.file = DEFAULT_MAP_NAME;
+				if (v.find("index") != v.end()) temp.num = v["index"];
+				else temp.num = 0;
+				portals.push_back(temp);
 			}
 			for (const auto& entity : map_data["entities"]) {
 				if (entity["type"] == "enemy") {
@@ -288,8 +296,8 @@ void Editor::saveMap(const std::string & path) {
 	}
 	// input the portals into an array one by one
 	map_data["portals"] = json::array();
-	for (const Vec2& v : portals) {
-		json vec = { {"x", v.x}, {"y", v.y } };
+	for (const PortalEntry& v : portals) {
+		json vec = { {"x", v.x}, {"y", v.y }, {"file", v.file}, {"index", v.num} };
 		map_data["portals"].push_back(vec);
 	}
 	// input the entities into an array one by one

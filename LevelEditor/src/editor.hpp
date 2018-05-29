@@ -51,13 +51,14 @@ private:
 	bool pan_started;
 	bool show_HUD;
 	int current_spawn_index;
+	int current_portal_index;
 
 	// -------------------------------------------------------------------------------
 	// MAP SETTINGS
 	// -------------------------------------------------------------------------------
 	int tile_size;
 	std::vector<Vec2> player_spawns;
-	std::vector<Vec2> portals;
+	std::vector<PortalEntry> portals;
 	std::vector<EntityEntry> entities;
 	std::string tilemap_source;
 	std::string background_source;
