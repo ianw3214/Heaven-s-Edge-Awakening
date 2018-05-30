@@ -306,4 +306,7 @@ void Game::loadMap(const std::string & path, bool verbose) {
 	QcEngine::loadTexture("bg", background_source);
 
 	LOG("+= FINISHED LOADING MAP =+");
+
+	// reset the delta once loading the map
+	delta = 0.f;
 }

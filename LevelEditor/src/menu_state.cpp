@@ -43,6 +43,40 @@ void Editor::renderMenu() {
 		num_tex->render((1280 - 10) / 2, (720 - 60) / 2);
 		delete num_tex;
 	}
+	if (menu_state == MENU_MAP_SETTINGS) {
+		int anchor_x = (1280 - 256) / 2;
+		int anchor_y = (720 - 128) / 2 - 100;
+		// RENDER THE MAP SELECTION PANEL
+		{
+			QcEngine::getTexture(BLANK_MENU)->render(anchor_x, anchor_y);
+			// render the title
+			Texture * title = new Texture(getTextTexture("CURRENT MAP", "default_16", { 0, 0, 0 }));
+			title->render(anchor_x + 20, anchor_y + 20);
+			delete title;
+			// render the name of the current file
+			SDL_Texture * file_text = getTextTexture(current_map, "default_16", { 0, 0, 0 });
+			Texture * file_tex = new Texture(file_text);
+			file_tex->render(anchor_x + 20, anchor_y + 40);
+			delete file_tex;
+		}
+		anchor_y += 130;
+		// RENDER THE MAP HEIGHT/WIDTH PANEL
+		{
+			QcEngine::getTexture(BLANK_MENU)->render(anchor_x, anchor_y);
+			QcEngine::getTexture(DIMENSION)->render(anchor_x, anchor_y);
+			// render the title
+			Texture * title = new Texture(getTextTexture("MAP DIMENSIONS", "default_16", { 0, 0, 0 }));
+			title->render(anchor_x + 20, anchor_y + 20);
+			// render the width / height
+			Texture * w = new Texture(getTextTexture(std::to_string(new_width), "default_16", { 0, 0, 0 }));
+			w->render(anchor_x + 180, anchor_y + 62);
+			Texture * h = new Texture(getTextTexture(std::to_string(new_height), "default_16", { 0, 0, 0 }));
+			h->render(anchor_x + 180, anchor_y + 95);
+			delete title;
+			delete w;
+			delete h;
+		}
+	}
 }
 
 void Editor::handleKeyPressMenu() {
@@ -64,6 +98,26 @@ void Editor::handleKeyPressMenu() {
 		if (menu_state == MENU_EDIT_PORTAL) {
 			state = STATE_EDITOR;
 		}
+		// save the new map with new settings
+		if (menu_state == MENU_MAP_SETTINGS) {
+			// only update the map width/height for now
+			std::vector<int> new_map(new_width * new_height, -1);
+			std::vector<bool> new_collision(new_width * new_height, false);
+			for (int i = 0; i < new_width; ++i) {
+				for (int j = 0; j < new_height; ++j) {
+					if (i < map_width && j < map_height) {
+						new_map[j * new_width + i] = tilemap[tileIndex(i, j)];
+						new_collision[j * new_width + i] = collisionmap[tileIndex(i, j)];
+					}
+				}
+			}
+			std::swap(new_map, tilemap);
+			std::swap(new_collision, collisionmap);
+			map_width = new_width;
+			map_height = new_height;
+			// TODO: remove entities that are out of bounds
+			state = STATE_EDITOR;
+		}
 	}
 }
 
@@ -74,6 +128,38 @@ void Editor::handleLeftMouseClickMenu() {
 		int y = (QcEngine::getCVARint("WINDOW HEIGHT") - QcEngine::getTexture(SAVEMAP)->getHeight()) / 2;
 		if (Math::isColliding(m_pos, Math::Rectangle(x, y, 256, 128))) {
 			managerRef->startTextInput();
+		}
+	}
+	if (menu_state == MENU_MAP_SETTINGS) {
+		int anchor_x = (1280 - 256) / 2;
+		int anchor_y = (720 - 128) / 2 - 100;
+		Vec2 m_pos = Vec2(getMouseX(), getMouseY());
+		// if the user clicks on the map selection, enter file menu to choose a new map file
+		{
+			Math::Rectangle target = Math::Rectangle(anchor_x, anchor_y, 256, 128);
+			if (Math::isColliding(m_pos, target)) {
+				enterFileState(DEFAULT_MAP_FOLDER);
+			}
+		}
+		anchor_y += 130;
+		// if the user clicks on the map dimension buttons, update accordingly
+		{
+			Math::Rectangle w_left = Math::Rectangle(anchor_x + 124, anchor_y + 61, 41, 18);
+			Math::Rectangle w_right = Math::Rectangle(anchor_x + 212, anchor_y + 61, 36, 18);
+			Math::Rectangle h_left = Math::Rectangle(anchor_x + 124, anchor_y + 93, 41, 15);
+			Math::Rectangle h_right = Math::Rectangle(anchor_x + 212, anchor_y + 93, 36, 18);
+			if (Math::isColliding(m_pos, w_left)) {
+				if (new_width > 0) new_width--;
+			}
+			if (Math::isColliding(m_pos, w_right)) {
+				new_width++;
+			}
+			if (Math::isColliding(m_pos, h_left)) {
+				if (new_height > 0) new_height--;
+			}
+			if (Math::isColliding(m_pos, h_right)) {
+				new_height++;
+			}
 		}
 	}
 }

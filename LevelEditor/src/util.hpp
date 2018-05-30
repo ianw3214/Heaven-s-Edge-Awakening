@@ -82,7 +82,12 @@
 #define SPAWN_SELECT_IMG	"../assets/editor/spawn_block_select.png"
 #define BLANK_MENU			"blank_menu"
 #define BLANK_MENU_IMG		"../assets/editor/blank_menu.png"
+#define LARGE_MENU			"large_menu"
+#define LARGE_MENU_IMG		"../assets/editor/blank_menu_large.png"
+#define DIMENSION			"dimension"
+#define DIMENSION_IMG		"../assets/editor/dimension_overlay.png"
 
+// enumeration representing the overall state of the editor
 enum ProgramState {
 	STATE_EDITOR,
 	STATE_FILE,
@@ -90,32 +95,44 @@ enum ProgramState {
 	STATE_MENU
 };
 
+// enumeration representing the editing state
 enum EditorState {
 	EDITOR_EDIT,
 	EDITOR_PANNING,
 	EDITOR_PICK
 };
 
+// enumeration representing the menu state
 enum MenuState {
 	MENU_SAVEMAP,
 	MENU_EDIT_SPAWN,
-	MENU_EDIT_PORTAL
+	MENU_EDIT_PORTAL,
+	MENU_MAP_SETTINGS
 };
 
+// enumeration representing the edit mode
 enum EditMode {
 	EDIT_TILE,
 	EDIT_COLLISION,
 	EDIT_ENTITIES
 };
 
+// enumeration representing the currently edited entity
 enum EntityEditMode {
 	E_EDIT_PLAYER,
 	E_EDIT_ENEMY,
 	E_EDIT_PORTAL
 };
 
+// enumeration representing the types of entities
 enum EntityType {
 	E_ENEMY
+};
+
+// enumeration representing the action taken by file state after choosing
+enum FileMode {
+	FILE_LOADMAP,
+	FILE_LOADTILEMAP
 };
 
 struct EntityEntry {

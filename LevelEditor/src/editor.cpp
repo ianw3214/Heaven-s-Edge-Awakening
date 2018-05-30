@@ -61,18 +61,10 @@ void Editor::init() {
 	QcEngine::loadTexture(SPAWN_BLOCK, SPAWN_BLOCK_IMG);
 	QcEngine::loadTexture(SPAWN_SELECT, SPAWN_SELECT_IMG);
 	QcEngine::loadTexture(BLANK_MENU, BLANK_MENU_IMG);
+	QcEngine::loadTexture(LARGE_MENU, LARGE_MENU_IMG);
+	QcEngine::loadTexture(DIMENSION, DIMENSION_IMG);
 	// initialize a default map
 	loadMap();
-	// initialize file things
-	int cur_y = 10;
-	for (auto& p : fs::directory_iterator(BASE_DIR)) {
-		if (!fs::is_directory(p)) {
-			std::string entry = p.path().string();
-			Math::Rectangle rect = Math::Rectangle(10, cur_y, 256, 24);
-			cur_y += 24;
-			files.push_back({ entry, rect, new Texture(getTextTexture(entry, "default_16", {255, 255, 255})) });
-		}
-	}
 }
 
 void Editor::cleanup() {
@@ -126,14 +118,7 @@ void Editor::render() {
 	QcEngine::getTexture(BORDER_CORNER)->render(-6 - camera_x, map_height * tile_size - camera_y);
 	// render the files if we are in that state
 	if (state == STATE_FILE) {
-		for (unsigned int i = 0; i < files.size(); ++i) {
-			// if the mouse is hovering over current item, render white overlay
-			if (getMouseX() > files[i].collision.pos.x && getMouseX() < files[i].collision.pos.x + files[i].collision.w &&
-				getMouseY() > files[i].collision.pos.y && getMouseY() < files[i].collision.pos.y + files[i].collision.h) {
-				QcEngine::getTexture(WHITE_BAR)->render(10, 10 + 24 * i);
-			}
-			files[i].tex->render(10, 10 + 24 * i);
-		}
+		renderFile();
 	}
 	if (state == STATE_EDITOR) {
 		renderEditor();
@@ -146,7 +131,7 @@ void Editor::render() {
 void Editor::handleKeyPresses() {
 	// use the escape key to return a state
 	if (keyDown(SDL_SCANCODE_ESCAPE)) {
-		if (state == STATE_MENU) {
+		if (state == STATE_MENU || state == STATE_FILE) {
 			state = STATE_EDITOR;
 		} else {
 			exit();
@@ -158,7 +143,7 @@ void Editor::handleKeyPresses() {
 	/*
 	// temporary key to put file loading
 	if (keyDown(SDL_SCANCODE_R)) {
-		state = STATE_FILE;
+		enterFileState();
 	}
 	*/
 	// handle editor key presses
@@ -169,6 +154,12 @@ void Editor::handleKeyPresses() {
 	if (keyDown(SDL_SCANCODE_H)) {
 		show_HUD = !show_HUD;
 	}
+	if (keyDown(SDL_SCANCODE_TAB)) {
+		state = STATE_MENU;
+		menu_state = MENU_MAP_SETTINGS;
+		new_width = map_width;
+		new_height = map_height;
+	}
 }
 
 void Editor::handleLeftMouseClick() {
@@ -178,18 +169,7 @@ void Editor::handleLeftMouseClick() {
 	}
 	// TODO: generalize this so multiple things can ask for a file menu and have one be returned
 	if (state == STATE_FILE) {
-		for (unsigned int i = 0; i < files.size(); ++i) {
-			if (getMouseX() > files[i].collision.pos.x && getMouseX() < files[i].collision.pos.x + files[i].collision.w &&
-				getMouseY() > files[i].collision.pos.y && getMouseY() < files[i].collision.pos.y + files[i].collision.h) {
-				TileMap * old = tiles;
-				tiles = new TileMap(files[i].name);
-				delete old;
-				state = STATE_EDITOR;
-				// TODO: fix metadata loading when opening file
-				tiles->generateTiles(DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE);
-				break;
-			}
-		}
+		handleLeftMouseClickFile();
 	}
 	// if the user clicks the box, focus in to handle text input
 	if (state == STATE_MENU) {
@@ -278,6 +258,7 @@ void Editor::loadMap(const std::string & path) {
 		resetMap();
 		saveMap(path);
 	}
+	current_map = path;
 	QcEngine::loadTexture("background", background_source);
 }
 
@@ -312,9 +293,9 @@ void Editor::saveMap(const std::string & path) {
 	map_data["map height"] = map_height;
 	map_data["tiles"] = tilemap;
 	map_data["collision"] = collisionmap;
-
+	
 	map_file << map_data;
-	std::cout << map_data.dump(4) << std::endl;
+	// std::cout << map_data.dump(4) << std::endl;
 
 	map_file.close();
 }
