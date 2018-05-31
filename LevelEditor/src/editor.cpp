@@ -62,6 +62,7 @@ void Editor::init() {
 	QcEngine::loadTexture(SPAWN_SELECT, SPAWN_SELECT_IMG);
 	QcEngine::loadTexture(BLANK_MENU, BLANK_MENU_IMG);
 	QcEngine::loadTexture(LARGE_MENU, LARGE_MENU_IMG);
+	QcEngine::loadTexture(SMALL_MENU, SMALL_MENU_IMG);
 	QcEngine::loadTexture(DIMENSION, DIMENSION_IMG);
 	QcEngine::loadTexture(MISSING, MISSING_IMG);
 	// initialize a default map

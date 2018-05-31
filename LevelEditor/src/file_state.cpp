@@ -51,9 +51,13 @@ void Editor::handleLeftMouseClickFile() {
 				tilemap_source = files[i].name;
 				TileMap * old = tiles;
 				tiles = new TileMap(tilemap_source);
-				delete old;
-				state = STATE_EDITOR;
 				tiles->generateTiles(tile_size, tile_size);
+				delete old;
+			}
+			// load the file as a background source
+			if (file_mode == FILE_LOADBACKGROUND) {
+				background_source = files[i].name;
+				QcEngine::loadTexture("background", background_source);
 			}
 			// change back to normal editor mode
 			state = STATE_EDITOR;

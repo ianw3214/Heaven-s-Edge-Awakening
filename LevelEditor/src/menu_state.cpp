@@ -48,15 +48,15 @@ void Editor::renderMenu() {
 		int anchor_y = (720 - 128) / 2 - 100;
 		// RENDER THE MAP SELECTION PANEL
 		{
-			QcEngine::getTexture(BLANK_MENU)->render(anchor_x, anchor_y);
+			QcEngine::getTexture(SMALL_MENU)->render(anchor_x, anchor_y);
 			// render the title
 			Texture title(getTextTexture("CURRENT MAP", "default_16", { 0, 0, 0 }));
-			title.render(anchor_x + 20, anchor_y + 20);
+			title.render(anchor_x + 20, anchor_y + 10);
 			// render the name of the current file
 			Texture file_tex(getTextTexture(current_map, "default_16", { 0, 0, 0 }));
-			file_tex.render(anchor_x + 20, anchor_y + 80);
+			file_tex.render(anchor_x + 20, anchor_y + 30);
 		}
-		anchor_y += 130;
+		anchor_y += 66;
 		// RENDER THE MAP HEIGHT/WIDTH PANEL
 		{
 			QcEngine::getTexture(BLANK_MENU)->render(anchor_x, anchor_y);
@@ -73,13 +73,24 @@ void Editor::renderMenu() {
 		anchor_y += 130;
 		// RENDER THE TILEMAP SOURCE PANEL
 		{
-			QcEngine::getTexture(BLANK_MENU)->render(anchor_x, anchor_y);
+			QcEngine::getTexture(SMALL_MENU)->render(anchor_x, anchor_y);
 			// render the title
 			Texture title(getTextTexture("TILEMAP SOURCE", "default_16", { 0, 0, 0 }));
-			title.render(anchor_x + 20, anchor_y + 20);
+			title.render(anchor_x + 20, anchor_y + 10);
 			// render the name of the current tilemap file
 			Texture file_tex(getTextTexture(tilemap_source, "default_16", { 0, 0, 0 }));
-			file_tex.render(anchor_x + 20, anchor_y + 80);
+			file_tex.render(anchor_x + 20, anchor_y + 30);
+		}
+		anchor_y += 66;
+		// RENDER THE BACKGROUND SOURCE PANEL
+		{
+			QcEngine::getTexture(SMALL_MENU)->render(anchor_x, anchor_y);
+			// render the title
+			Texture title(getTextTexture("BACKGROUND SOURCE", "default_16", { 0, 0, 0 }));
+			title.render(anchor_x + 20, anchor_y + 10);
+			// render the name of the current background file
+			Texture file_tex(getTextTexture(background_source, "default_16", { 0, 0, 0 }));
+			file_tex.render(anchor_x + 20, anchor_y + 30);
 		}
 	}
 }
@@ -141,12 +152,12 @@ void Editor::handleLeftMouseClickMenu() {
 		Vec2 m_pos = Vec2(getMouseX(), getMouseY());
 		// if the user clicks on the map selection, enter file menu to choose a new map file
 		{
-			Math::Rectangle target = Math::Rectangle(anchor_x, anchor_y, 256, 128);
+			Math::Rectangle target = Math::Rectangle(anchor_x, anchor_y, 256, 64);
 			if (Math::isColliding(m_pos, target)) {
 				enterFileState(FILE_LOADMAP, DEFAULT_MAP_FOLDER);
 			}
 		}
-		anchor_y += 130;
+		anchor_y += 66;
 		// if the user clicks on the map dimension buttons, update accordingly
 		{
 			Math::Rectangle w_left = Math::Rectangle(anchor_x + 124, anchor_y + 61, 41, 18);
@@ -169,9 +180,17 @@ void Editor::handleLeftMouseClickMenu() {
 		anchor_y += 130;
 		// if the user clicks on the tilemap source, enter file menu to choose a new tilemap
 		{
-			Math::Rectangle target = Math::Rectangle(anchor_x, anchor_y, 256, 128);
+			Math::Rectangle target = Math::Rectangle(anchor_x, anchor_y, 256, 64);
 			if (Math::isColliding(m_pos, target)) {
 				enterFileState(FILE_LOADTILEMAP, DEFAULT_ASSETS);
+			}
+		}
+		anchor_y += 66;
+		// if the user clicks on the background source, enter file menu to choose a new background
+		{
+			Math::Rectangle target = Math::Rectangle(anchor_x, anchor_y, 256, 64);
+			if (Math::isColliding(m_pos, target)) {
+				enterFileState(FILE_LOADBACKGROUND, DEFAULT_ASSETS);
 			}
 		}
 	}

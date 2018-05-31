@@ -85,6 +85,8 @@
 #define BLANK_MENU_IMG		"../assets/editor/blank_menu.png"
 #define LARGE_MENU			"large_menu"
 #define LARGE_MENU_IMG		"../assets/editor/blank_menu_large.png"
+#define SMALL_MENU			"small_menu"
+#define SMALL_MENU_IMG		"../assets/editor/blank_menu_small.png"
 #define DIMENSION			"dimension"
 #define DIMENSION_IMG		"../assets/editor/dimension_overlay.png"
 #define MISSING				"missing"
@@ -135,7 +137,8 @@ enum EntityType {
 // enumeration representing the action taken by file state after choosing
 enum FileMode {
 	FILE_LOADMAP,
-	FILE_LOADTILEMAP
+	FILE_LOADTILEMAP,
+	FILE_LOADBACKGROUND
 };
 
 struct EntityEntry {
