@@ -131,6 +131,12 @@ void Editor::render() {
 	if (state == STATE_MENU) {
 		renderMenu();
 	}
+	if (show_HUD) {
+		// render the x and y tile position of the cursor
+		std::string text = std::to_string(cur_tile_x) + ", " + std::to_string(cur_tile_y);
+		Texture tile_pos(getTextTexture(text, "default_16", { 255, 255, 255 }));
+		tile_pos.render(QcEngine::getCVARint("WINDOW WIDTH") - 50, QcEngine::getCVARint("WINDOW HEIGHT") - 20);
+	}
 }
 
 void Editor::handleKeyPresses() {
