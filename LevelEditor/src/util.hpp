@@ -8,6 +8,7 @@
 #define BASE_DIR			"../assets"
 #define DEFAULT_FONT		"../assets/fonts/Munro.ttf"
 
+#define DEFAULT_ASSETS		"../assets/"
 #define DEFAULT_TILEMAP		"../assets/tilemap.png"
 #define DEFAULT_BACKGROUND	"../assets/parallax_test.png"
 
@@ -86,6 +87,8 @@
 #define LARGE_MENU_IMG		"../assets/editor/blank_menu_large.png"
 #define DIMENSION			"dimension"
 #define DIMENSION_IMG		"../assets/editor/dimension_overlay.png"
+#define MISSING				"missing"
+#define MISSING_IMG			"../assets/editor/missing.png"
 
 // enumeration representing the overall state of the editor
 enum ProgramState {

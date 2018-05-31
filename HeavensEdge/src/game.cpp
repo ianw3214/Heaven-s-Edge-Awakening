@@ -38,12 +38,19 @@ void Game::init() {
 	AnimatedTexture * t = static_cast<AnimatedTexture*>(QcEngine::loadTexture("enemy", "../assets/enemy.png", T_ANIMATED));
 	t->generateAtlas(64, 128);
 	t->addAnimationState({ 0, 3 });
+	createFont("default_24", DEFAULT_FONT, 24);
 	// load the map data from a specified path
 	loadMap(current_map, true);
 	// adjust the camera to be centered on the player
 	// TODO: get rid of the magic numbers
 	data->cam_x = player->getX() - 1280 / 2;
 	data->cam_y = player->getY() - 720 / 2;
+
+	dialogue.push("test1");
+	dialogue.push("test2");
+	dialogue.push("test3");
+	dialogue.push("test4");
+	dialogue.push("test5");
 }
 
 void Game::cleanup() {
@@ -73,6 +80,11 @@ void Game::update() {
 	}
 	// call any other game update functions there are
 	updateCamera();
+	// update the dialogue text
+	if (current_text.size() == 0 && !dialogue.empty()) {
+		current_text = dialogue.front();
+		dialogue.pop();
+	}
 	// -------------------------------------------------------------------------------
 	// DEBUG CODE
 	// -------------------------------------------------------------------------------
@@ -87,7 +99,7 @@ void Game::render() {
 	QcEngine::getTexture("bg")->render(-data->cam_x / 2, -data->cam_y / 2);
 	for (int i = 0; i < data->map_height; ++i) {
 		for (int j = 0; j < data->map_width; ++j) {
-			ASSERT(i * data->map_width + j < data->tilemap.size());
+			ASSERT(i * data->map_width + j < static_cast<int>(data->tilemap.size()));
 			if (data->tilemap[tileIndex(j, i)] >= 0) {
 				tiles->render(j * data->tile_size - data->cam_x, i * data->tile_size - data->cam_y, data->tilemap[tileIndex(j, i)]);
 			}
@@ -99,6 +111,12 @@ void Game::render() {
 	// TODO: determine if portals need to be rendered or if they are invisible
 	for (const PortalEntry& v : data->portals) {
 		QcEngine::getTexture(PORTAL)->render(v.x * data->tile_size - data->cam_x, v.y * data->tile_size - data->cam_y);
+	}
+	// render the dialogue if there is any
+	if (current_text.size() > 0) {
+		SDL_Texture * text = getTextTexture(current_text, "default_24", { 255, 255, 255 });
+		Texture tex(text);
+		tex.render(20, 650);
 	}
 }
 
@@ -127,6 +145,9 @@ void Game::handleKeyPresses() {
 	}
 	if (keyDown(SDL_SCANCODE_UP)) {
 		data->keyStates |= KEY_UP;
+	}
+	if (keyDown(SDL_SCANCODE_C)) {
+		current_text = "";
 	}
 }
 
@@ -315,6 +336,4 @@ void Game::loadMap(const std::string & path, bool verbose) {
 
 	LOG("+= FINISHED LOADING MAP =+");
 
-	// reset the delta once loading the map
-	delta = 0.f;
 }

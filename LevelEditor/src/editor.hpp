@@ -99,7 +99,7 @@ private:
 	// -------------------------------------------------------------------------------
 	// FILE HELPER FUNCTIONS
 	// -------------------------------------------------------------------------------
-	void enterFileState(const std::string& dir = BASE_DIR);
+	void enterFileState(FileMode mode, const std::string& dir = BASE_DIR);
 	void renderFile();
 	void handleKeyPressFile();
 	void handleLeftMouseClickFile();

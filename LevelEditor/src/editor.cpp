@@ -63,6 +63,7 @@ void Editor::init() {
 	QcEngine::loadTexture(BLANK_MENU, BLANK_MENU_IMG);
 	QcEngine::loadTexture(LARGE_MENU, LARGE_MENU_IMG);
 	QcEngine::loadTexture(DIMENSION, DIMENSION_IMG);
+	QcEngine::loadTexture(MISSING, MISSING_IMG);
 	// initialize a default map
 	loadMap();
 }
@@ -99,7 +100,11 @@ void Editor::render() {
 	for (int i = 0; i < map_height; ++i) {
 		for (int j = 0; j < map_width; ++j) {
 			if (tilemap[tileIndex(j, i)] >= 0) {
-				tiles->render(j * tile_size - camera_x, i * tile_size - camera_y, tilemap[tileIndex(j, i)]);
+				if (tilemap[tileIndex(j, i)] >= tiles->getNumTiles()) {
+					QcEngine::getTexture(MISSING)->render(j * tile_size - camera_x, i * tile_size - camera_y);
+				} else {
+					tiles->render(j * tile_size - camera_x, i * tile_size - camera_y, tilemap[tileIndex(j, i)]);
+				}
 			}
 		}
 	}

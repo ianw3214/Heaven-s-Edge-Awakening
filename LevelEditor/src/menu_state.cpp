@@ -50,14 +50,11 @@ void Editor::renderMenu() {
 		{
 			QcEngine::getTexture(BLANK_MENU)->render(anchor_x, anchor_y);
 			// render the title
-			Texture * title = new Texture(getTextTexture("CURRENT MAP", "default_16", { 0, 0, 0 }));
-			title->render(anchor_x + 20, anchor_y + 20);
-			delete title;
+			Texture title(getTextTexture("CURRENT MAP", "default_16", { 0, 0, 0 }));
+			title.render(anchor_x + 20, anchor_y + 20);
 			// render the name of the current file
-			SDL_Texture * file_text = getTextTexture(current_map, "default_16", { 0, 0, 0 });
-			Texture * file_tex = new Texture(file_text);
-			file_tex->render(anchor_x + 20, anchor_y + 40);
-			delete file_tex;
+			Texture file_tex(getTextTexture(current_map, "default_16", { 0, 0, 0 }));
+			file_tex.render(anchor_x + 20, anchor_y + 80);
 		}
 		anchor_y += 130;
 		// RENDER THE MAP HEIGHT/WIDTH PANEL
@@ -65,16 +62,24 @@ void Editor::renderMenu() {
 			QcEngine::getTexture(BLANK_MENU)->render(anchor_x, anchor_y);
 			QcEngine::getTexture(DIMENSION)->render(anchor_x, anchor_y);
 			// render the title
-			Texture * title = new Texture(getTextTexture("MAP DIMENSIONS", "default_16", { 0, 0, 0 }));
-			title->render(anchor_x + 20, anchor_y + 20);
+			Texture title(getTextTexture("MAP DIMENSIONS", "default_16", { 0, 0, 0 }));
+			title.render(anchor_x + 20, anchor_y + 20);
 			// render the width / height
-			Texture * w = new Texture(getTextTexture(std::to_string(new_width), "default_16", { 0, 0, 0 }));
-			w->render(anchor_x + 180, anchor_y + 62);
-			Texture * h = new Texture(getTextTexture(std::to_string(new_height), "default_16", { 0, 0, 0 }));
-			h->render(anchor_x + 180, anchor_y + 95);
-			delete title;
-			delete w;
-			delete h;
+			Texture w(getTextTexture(std::to_string(new_width), "default_16", { 0, 0, 0 }));
+			w.render(anchor_x + 180, anchor_y + 62);
+			Texture h(getTextTexture(std::to_string(new_height), "default_16", { 0, 0, 0 }));
+			h.render(anchor_x + 180, anchor_y + 95);
+		}
+		anchor_y += 130;
+		// RENDER THE TILEMAP SOURCE PANEL
+		{
+			QcEngine::getTexture(BLANK_MENU)->render(anchor_x, anchor_y);
+			// render the title
+			Texture title(getTextTexture("TILEMAP SOURCE", "default_16", { 0, 0, 0 }));
+			title.render(anchor_x + 20, anchor_y + 20);
+			// render the name of the current tilemap file
+			Texture file_tex(getTextTexture(tilemap_source, "default_16", { 0, 0, 0 }));
+			file_tex.render(anchor_x + 20, anchor_y + 80);
 		}
 	}
 }
@@ -138,7 +143,7 @@ void Editor::handleLeftMouseClickMenu() {
 		{
 			Math::Rectangle target = Math::Rectangle(anchor_x, anchor_y, 256, 128);
 			if (Math::isColliding(m_pos, target)) {
-				enterFileState(DEFAULT_MAP_FOLDER);
+				enterFileState(FILE_LOADMAP, DEFAULT_MAP_FOLDER);
 			}
 		}
 		anchor_y += 130;
@@ -159,6 +164,14 @@ void Editor::handleLeftMouseClickMenu() {
 			}
 			if (Math::isColliding(m_pos, h_right)) {
 				new_height++;
+			}
+		}
+		anchor_y += 130;
+		// if the user clicks on the tilemap source, enter file menu to choose a new tilemap
+		{
+			Math::Rectangle target = Math::Rectangle(anchor_x, anchor_y, 256, 128);
+			if (Math::isColliding(m_pos, target)) {
+				enterFileState(FILE_LOADTILEMAP, DEFAULT_ASSETS);
 			}
 		}
 	}

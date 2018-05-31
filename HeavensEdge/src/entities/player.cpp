@@ -56,7 +56,7 @@ void Player::update(Uint32 delta) {
 	if (jumping && data->collidingWithTiles(top_test)) {
 		y_vel = -y_vel / 4.f;
 	}
-	// calculate change in y position for the player
+	// calculate change in y position for the player	
 	y_vel += static_cast<int>(delta / 1000.f * GRAVITY);
 	if (y_vel != 0.f) {
 		move(DIR_DOWN, static_cast<int>(y_vel * delta / 1000.f));

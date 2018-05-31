@@ -13,6 +13,8 @@ using json = nlohmann::json;
 #include "entities\player.hpp"
 #include "entities\enemy.hpp"
 
+#define DEFAULT_FONT		"../assets/fonts/Munro.ttf"
+
 #define KEY_RIGHT	(1 << 0)
 #define KEY_LEFT	(1 << 1)
 #define KEY_SPACE	(1 << 2)
@@ -107,6 +109,12 @@ private:
 	// variables to keep track of map transitions and data
 	std::string current_map;
 	int start_index;
+
+	// -------------------------------------------------------------------------------
+	// DIALOGUE
+	// -------------------------------------------------------------------------------
+	std::queue<std::string> dialogue;
+	std::string current_text;
 
 	// -------------------------------------------------------------------------------
 	// UTILITY FUNCTIONS

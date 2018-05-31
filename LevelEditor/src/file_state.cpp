@@ -1,10 +1,11 @@
 #include "editor.hpp"
 
-void Editor::enterFileState(const std::string& dir) {
+void Editor::enterFileState(FileMode mode, const std::string& dir) {
 	if (!fs::is_directory(dir)) {
 		ERR(dir << " isn't a directory...");
 		return;
 	}
+	file_mode = mode;
 	state = STATE_FILE;
 	files.clear();
 	// initialize file entries in the target directory
@@ -41,17 +42,18 @@ void Editor::handleLeftMouseClickFile() {
 	for (unsigned int i = 0; i < files.size(); ++i) {
 		if (getMouseX() > files[i].collision.pos.x && getMouseX() < files[i].collision.pos.x + files[i].collision.w &&
 			getMouseY() > files[i].collision.pos.y && getMouseY() < files[i].collision.pos.y + files[i].collision.h) {
-			// SAVE THE FOUND FILE SOMEHOW
-			/*
-			TileMap * old = tiles;
-			tiles = new TileMap(files[i].name);
-			delete old;
-			state = STATE_EDITOR;
-			// TODO: fix metadata loading when opening file
-			tiles->generateTiles(DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE);
-			*/
+			// load the file as map data
 			if (file_mode == FILE_LOADMAP) {
 				loadMap(files[i].name);
+			}
+			// load the file as a tilemap
+			if (file_mode == FILE_LOADTILEMAP) {
+				tilemap_source = files[i].name;
+				TileMap * old = tiles;
+				tiles = new TileMap(tilemap_source);
+				delete old;
+				state = STATE_EDITOR;
+				tiles->generateTiles(tile_size, tile_size);
 			}
 			// change back to normal editor mode
 			state = STATE_EDITOR;
