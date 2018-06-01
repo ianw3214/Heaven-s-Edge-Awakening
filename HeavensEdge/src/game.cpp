@@ -97,11 +97,17 @@ void Game::render() {
 	// TOOD: figure out better way to store backgrounds
 	// render parallax background
 	QcEngine::getTexture("bg")->render(-data->cam_x / 2, -data->cam_y / 2);
+	int x;
+	int y;
 	for (int i = 0; i < data->map_height; ++i) {
 		for (int j = 0; j < data->map_width; ++j) {
-			ASSERT(i * data->map_width + j < static_cast<int>(data->tilemap.size()));
-			if (data->tilemap[tileIndex(j, i)] >= 0) {
-				tiles->render(j * data->tile_size - data->cam_x, i * data->tile_size - data->cam_y, data->tilemap[tileIndex(j, i)]);
+			x = j * data->tile_size - data->cam_x;
+			y = i * data->tile_size - data->cam_y;
+			if (x > -64 && y > -64 && x < 1280 + 64 && y < 728 + 64) {
+				ASSERT(tileIndex(j, i) < static_cast<int>(data->tilemap.size()));
+				if (data->tilemap[tileIndex(j, i)] >= 0) {
+					tiles->render(x, y, data->tilemap[tileIndex(j, i)]);
+				}
 			}
 		}
 	}

@@ -23,7 +23,7 @@ using json = nlohmann::json;
 #define KEY_UP		(1 << 5)
 
 #define MAP_FOLDER			"../assets/maps/"
-#define DEFAULT_MAP_FILE	"../assets/maps/default.txt"
+#define DEFAULT_MAP_FILE	"../assets/maps/first.txt"
 
 #define CAMERA_SPEED 700
 
